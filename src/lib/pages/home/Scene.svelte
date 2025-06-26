@@ -9,6 +9,8 @@
   import Water from "./components/world/Water.svelte";
   import GameController from "./components/gameController/gameController.svelte";
   import Ground from "./components/world/Ground.svelte";
+  import Algorand from "./components/checkPoints/Algorand.svelte";
+  
 
   import { DEG2RAD } from "three/src/math/MathUtils.js";
 
@@ -56,6 +58,9 @@
 <GameController />
 
 <City />
+
+<Algorand/>
+
 <!-- <Player /> -->
 <!-- <Py /> -->
 <!-- <FlyingCarSpawner /> -->
