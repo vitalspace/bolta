@@ -74,38 +74,40 @@ class App {
     localStorage.removeItem("peraWallet.account");
   }
 
-  async compileAndSendTxn(txn: Transaction) {
-    try {
-      const connectedAccount = this.getConnectedAccount();
-      if (!connectedAccount) {
-        throw new Error("No hay cuenta conectada");
-      }
+  // Crear un signer personalizado para Pera Wallet
+  makePeraWalletSigner() {
+    return {
+      signTxn: async (txn: Transaction): Promise<Uint8Array> => {
+        const txnToSign = {
+          txn: txn,
+          signers: [],
+        };
 
-      console.log("Firmando transacción...");
-      
-      // Formato correcto para Pera Wallet
-      const txnsToSign = [{
-        txn: txn,
-        signers: [connectedAccount],
-      }];
+        try {
+          const signedTxn = await peraWallet.signTransaction([txnToSign]);
+          return signedTxn[0];
+        } catch (error) {
+          console.error("Error al firmar con Pera Wallet:", error);
+          throw error;
+        }
+      },
+    };
+  }
 
-      const signedTxns = await peraWallet.signTransaction(txnsToSign);
-      const txId = txn.txID().toString();
+  async signTransaction(
+    txnGroup: Transaction[],
+    indexesToSign: number[]
+  ): Promise<Uint8Array[]> {
+    const sender = this.getConnectedAccount()!;
 
-      console.log("Enviando transacción firmada...");
-      await algoclient.sendRawTransaction(signedTxns).do();
-      
-      console.log("Esperando confirmación...");
-      await algosdk.waitForConfirmation(algoclient, txId, 3);
+    const signerTxns = txnGroup.map((txn, i) => ({
+      txn,
+      signers: indexesToSign.includes(i) ? [sender] : [],
+    }));
 
-      const confirmedTxn = await algoclient.pendingTransactionInformation(txId).do();
-      console.log("Transacción confirmada:", txId);
-      
-      return confirmedTxn;
-    } catch (error) {
-      console.error("Error al compilar y enviar transacción:", error);
-      throw error;
-    }
+    const signedBlobs = await peraWallet.signTransaction(signerTxns);
+
+    return signedBlobs;
   }
 
   async executeABIMethod(
@@ -129,20 +131,6 @@ class App {
       // Obtener el método del contrato
       const method = contract.getMethodByName(methodName);
 
-      // Crear signer personalizado para ABI usando el código correcto
-      const signer = {
-        addr: connectedAccount,
-        signer: async (txnGroup: Transaction[], indexesToSign: number[]) => {
-          const signerTxns = txnGroup.map((txn, i) => ({
-            txn,
-            signers: indexesToSign.includes(i) ? [connectedAccount] : [],
-          }));
-
-          const signedBlobs = await peraWallet.signTransaction(signerTxns);
-          return signedBlobs;
-        }
-      };
-
       // Agregar la llamada al método ABI
       this.atc.addMethodCall({
         appID: appId,
@@ -150,8 +138,8 @@ class App {
         methodArgs: methodArgs,
         sender: connectedAccount,
         suggestedParams: params,
-        signer: signer,
-        ...extraTxnFields,
+        signer: this.signTransaction.bind(this),
+        ...extraTxnFields, // Para agregar accounts, foreignAssets, etc.
       });
 
       // Ejecutar las transacciones
@@ -174,9 +162,53 @@ class App {
     }
   }
 
+  async compileAndSendTxn(txn: Transaction) {
+    try {
+      const txnToSign = {
+        txn: txn,
+        signers: [],
+      };
+
+      const signedTxn = await peraWallet.signTransaction([txnToSign]);
+      const txId = txn.txID().toString();
+
+      await algoclient.sendRawTransaction(signedTxn).do();
+      await algosdk.waitForConfirmation(algoclient, txId, 3);
+
+      return await algoclient.pendingTransactionInformation(txId).do();
+    } catch (error) {
+      console.error("Error al compilar y enviar transacción:", error);
+      throw error;
+    }
+  }
+
   async callPayment() {
     console.log("Llamando método payment() usando ABI...");
     return await this.executeABIMethod("payment");
+  }
+
+  async createFungibleAsset() {
+    console.log("Creando asset fungible...");
+
+    const params = await algoclient.getTransactionParams().do();
+    const connectedAccount = this.getConnectedAccount();
+
+    if (!connectedAccount) {
+      throw new Error("No hay cuenta conectada");
+    }
+
+    const txn = algosdk.makeApplicationCallTxnFromObject({
+      sender: connectedAccount,
+      suggestedParams: params,
+      appIndex: appId,
+      onComplete: algosdk.OnApplicationComplete.NoOpOC,
+      //@ts-ignore
+      appArgs: [new Uint8Array(Buffer.from("fungibleAssetCreate"))],
+    });
+
+    const result = await this.compileAndSendTxn(txn);
+    console.log("Asset fungible creado:", result);
+    return result;
   }
 
   async createNFT() {
@@ -219,49 +251,56 @@ class App {
         console.log("La cuenta ya tiene opt-in a la aplicación");
       }
 
-      // Intentar crear el NFT usando el método ABI
-      console.log("Llamando método nonFungibleAssetCreateAndSend usando ABI...");
-      const result = await this.executeABIMethod("nonFungibleAssetCreateAndSend");
+      // Crear el NFT usando el método directo
+      const params = await algoclient.getTransactionParams().do();
       
-      console.log("NFT creado exitosamente:", result);
+      // Aumentar el fee para cubrir las transacciones internas
+      params.fee = 3000; // 0.003 ALGO para cubrir múltiples transacciones internas
+      params.flatFee = true;
+
+      const txn = algosdk.makeApplicationCallTxnFromObject({
+        sender: connectedAccount,
+        suggestedParams: params,
+        appIndex: appId,
+        onComplete: algosdk.OnApplicationComplete.NoOpOC,
+        appArgs: [new Uint8Array(Buffer.from("nonFungibleAssetCreateAndSend"))],
+      });
+
+      const result = await this.signTransaction([txn], [0]);
+      console.log("NFT creado:", result, txn.rawTxID());
+
+      const txId = txn.txID().toString();
+      console.log("txId", txId);
+
+      await algoclient.sendRawTransaction(result).do();
+      await algosdk.waitForConfirmation(algoclient, txId, 3);
+
+      const confirmedTxn = await algoclient
+        .pendingTransactionInformation(txId)
+        .do();
+      
+      console.log("NFT creado exitosamente:", confirmedTxn);
+      
+      // Buscar el asset ID en las transacciones internas
+      const innerTxns = confirmedTxn["inner-txns"] || [];
+      let assetId;
+      for (const itxn of innerTxns) {
+        if (itxn["asset-index"]) {
+          assetId = itxn["asset-index"];
+          break;
+        }
+      }
+      
+      if (assetId) {
+        console.log("Asset ID del NFT creado:", assetId);
+      }
+
       return result;
 
     } catch (error) {
       console.error("Error detallado al crear NFT:", error);
       throw error;
     }
-  }
-
-  async createNFTDirect() {
-    const params = await algoclient.getTransactionParams().do();
-    const connectedAccount = this.getConnectedAccount();
-
-    if (!connectedAccount) {
-      throw new Error("No hay cuenta conectada");
-    }
-
-    // Aumentar el fee significativamente para cubrir las transacciones internas
-    params.fee = 10000; // 0.01 ALGO
-    params.flatFee = true;
-
-    console.log("Creando NFT con parámetros:", {
-      fee: params.fee,
-      flatFee: params.flatFee,
-      sender: connectedAccount
-    });
-
-    const txn = algosdk.makeApplicationCallTxnFromObject({
-      sender: connectedAccount,
-      suggestedParams: params,
-      appIndex: appId,
-      onComplete: algosdk.OnApplicationComplete.NoOpOC,
-      appArgs: [
-        new Uint8Array(Buffer.from("nonFungibleAssetCreateAndSend"))
-      ],
-    });
-
-    const result = await this.compileAndSendTxn(txn);
-    return result;
   }
 
   async optInApp(id: number) {
@@ -284,9 +323,16 @@ class App {
       appIndex: appId,
     });
 
-    const result = await this.compileAndSendTxn(optInTxn);
-    console.log("Opt-in exitoso. TxID:", result.txn?.txn?.tx || "ID no disponible");
-    return result;
+    // Enviar la transacción firmada con Pera Wallet
+    const signedTxn = await this.signTransaction([optInTxn], [0]);
+
+    const txId = optInTxn.txID().toString();
+
+    await algoclient.sendRawTransaction(signedTxn).do();
+    await algosdk.waitForConfirmation(algoclient, txId, 3);
+
+    console.log("Opt-in exitoso. TxID:", txId);
+    return txId;
   }
 }
 
