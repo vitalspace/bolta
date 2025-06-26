@@ -341,7 +341,8 @@ class App {
     const optInTxn = algosdk.makeApplicationOptInTxnFromObject({
       sender: connectedAccount,
       suggestedParams: params,
-      appIndex: appId,
+      appIndex: id, // Use the id parameter instead of global appId
+      note: new Uint8Array(0), // Explicitly set note as empty byte array
     });
 
     // Crear SignerTransaction según la documentación
