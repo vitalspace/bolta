@@ -18,13 +18,16 @@
     "vite": "^6.3.5"
   },
   "dependencies": {
+    "@algorandfoundation/algokit-utils": "^9.1.1",
     "@dimforge/rapier3d-compat": "^0.17.3",
     "@lucide/svelte": "^0.516.0",
+    "@perawallet/connect": "^1.4.2",
     "@tailwindcss/vite": "^4.1.10",
     "@threlte/core": "^8.0.5",
     "@threlte/extras": "^9.3.0",
     "@threlte/rapier": "^3.1.4",
     "@types/three": "^0.177.0",
+    "algosdk": "^3.3.1",
     "svelte-tweakpane-ui": "^1.5.8",
     "svelte5-router": "^3.0.2",
     "tailwindcss": "^4.1.10",
