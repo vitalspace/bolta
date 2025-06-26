@@ -129,17 +129,17 @@ class App {
       // Obtener el método del contrato
       const method = contract.getMethodByName(methodName);
 
-      // Crear signer personalizado para ABI
+      // Crear signer personalizado para ABI usando el código correcto
       const signer = {
         addr: connectedAccount,
         signer: async (txnGroup: Transaction[], indexesToSign: number[]) => {
-          const txnsToSign = txnGroup.map((txn, index) => ({
+          const signerTxns = txnGroup.map((txn, i) => ({
             txn,
-            signers: indexesToSign.includes(index) ? [connectedAccount] : [],
+            signers: indexesToSign.includes(i) ? [connectedAccount] : [],
           }));
 
-          const signedTxns = await peraWallet.signTransaction(txnsToSign);
-          return signedTxns;
+          const signedBlobs = await peraWallet.signTransaction(signerTxns);
+          return signedBlobs;
         }
       };
 
