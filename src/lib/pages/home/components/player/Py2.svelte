@@ -174,7 +174,10 @@ Command: npx @threlte/gltf@3.0.1 .\man.glb -T --draco /draco/
       if (currentVelocity === 6) {
         $actions.walk?.reset();
         $actions.Running?.play();
+        $actions.Jumping?.stop();
+        
       } else {
+        $actions.Jumping?.stop();
         $actions.Running?.reset();
         $actions.walk?.play();
       }
@@ -190,7 +193,6 @@ Command: npx @threlte/gltf@3.0.1 .\man.glb -T --draco /draco/
         true
       );
 
-      $actions.Jumping?.stop();
       $actions.walk?.stop();
       $actions.Running?.stop();
       $actions.idle?.play();
