@@ -39,7 +39,7 @@ Command: npx @threlte/gltf@3.0.1 .\man.glb -T --draco /draco/
   // Jump variables
   let isGrounded = $state(true);
   let jumpCooldown = $state(0);
-  const JUMP_FORCE = 8;
+  const JUMP_FORCE = 1;
   const JUMP_COOLDOWN_TIME = 0.3; // seconds
   const GROUND_CHECK_THRESHOLD = 0.1; // How close to ground to be considered grounded
 
