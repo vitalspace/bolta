@@ -4,6 +4,7 @@ Command: npx @threlte/gltf@3.0.1 .\city.glb -T -d /draco/
 -->
 
 <script>
+  import { Cuboid } from "@lucide/svelte";
   import { T } from "@threlte/core";
   import {
     useGltf,
@@ -11,6 +12,8 @@ Command: npx @threlte/gltf@3.0.1 .\city.glb -T -d /draco/
     FakeGlowMaterial,
     Outlines,
   } from "@threlte/extras";
+
+  import { AutoColliders } from "@threlte/rapier";
 
   let { fallback, error, children, ref = $bindable(), ...props } = $props();
 
@@ -23,410 +26,901 @@ Command: npx @threlte/gltf@3.0.1 .\city.glb -T -d /draco/
   {:then gltf}
     <T.Mesh
       geometry={gltf.nodes.Mesh1_Group1_Model.geometry}
-      material={gltf.materials["FrontColor.002"]}
-      position={[15.5, 4.5, -7.6]}
+      material={gltf.materials['FrontColor.013']}
+      position={[191.67, 4.5, -7.6]}
       rotation={[Math.PI / 2, 0, 0]}
     />
     <T.Mesh
-      geometry={gltf.nodes.Mesh10_Group10_Model.geometry}
-      material={gltf.materials["FrontColor.002"]}
-      position={[-16.77, 4.4, 52.5]}
+      geometry={gltf.nodes.Mesh10_G_3DGeom_24_2_G_3DGeom_24_1_G_3DGeom_24_Assembly_73_Mode.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[179.56, 5.27, -28.99]}
       rotation={[Math.PI / 2, 0, 0]}
     />
     <T.Mesh
-      geometry={gltf.nodes.Mesh11_Group11_Model.geometry}
-      material={gltf.materials["FrontColor.002"]}
-      position={[-17.92, 12.24, 47.8]}
+      geometry={gltf.nodes.Mesh100_G_3DGeom_3_5_G_3DGeom_3_4_G_3DGeom_3_3_Assembly_10_1_As.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[164.59, 5.89, -0.81]}
       rotation={[Math.PI / 2, 0, 0]}
     />
     <T.Mesh
-      geometry={gltf.nodes
-        .Mesh12_G_3DGeom_1_2_G_3DGeom_1_1_G_3DGeom_1_Assembly_4_Model.geometry}
-      material={gltf.materials["FrontColor.002"]}
-      position={[-11.22, 4.93, -1.77]}
+      geometry={gltf.nodes.Mesh101_G_3DGeom_4_5_G_3DGeom_4_4_G_3DGeom_4_3_Assembly_13_1_As.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[162.17, 1.5, -0.7]}
       rotation={[Math.PI / 2, 0, 0]}
     />
     <T.Mesh
-      geometry={gltf.nodes
-        .Mesh13_G_3DGeom_2_2_G_3DGeom_2_1_G_3DGeom_2_Assembly_7_Assembly
-        .geometry}
-      material={gltf.materials["FrontColor.002"]}
-      position={[-6.9, 4.2, -0.46]}
+      geometry={gltf.nodes.Mesh102_G_3DGeom_5_5_G_3DGeom_5_4_G_3DGeom_5_3_Assembly_16_1_As.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[168.87, 5.27, -0.6]}
       rotation={[Math.PI / 2, 0, 0]}
     />
     <T.Mesh
-      geometry={gltf.nodes
-        .Mesh14_G_3DGeom_3_2_G_3DGeom_3_1_G_3DGeom_3_Assembly_10_Assembl
-        .geometry}
-      material={gltf.materials["FrontColor.002"]}
-      position={[-11.58, 5.89, -0.81]}
+      geometry={gltf.nodes.Mesh103_G_3DGeom_6_5_G_3DGeom_6_4_G_3DGeom_6_3_Assembly_19_1_As.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[168.57, 5.25, -0.39]}
       rotation={[Math.PI / 2, 0, 0]}
     />
     <T.Mesh
-      geometry={gltf.nodes
-        .Mesh15_G_3DGeom_4_2_G_3DGeom_4_1_G_3DGeom_4_Assembly_13_Assembl
-        .geometry}
-      material={gltf.materials["FrontColor.002"]}
-      position={[-14, 1.5, -0.7]}
+      geometry={gltf.nodes.Mesh104_G_3DGeom_7_5_G_3DGeom_7_4_G_3DGeom_7_3_Assembly_22_1_As.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[167.66, 8.05, -0.68]}
       rotation={[Math.PI / 2, 0, 0]}
     />
     <T.Mesh
-      geometry={gltf.nodes
-        .Mesh16_G_3DGeom_5_2_G_3DGeom_5_1_G_3DGeom_5_Assembly_16_Assembl
-        .geometry}
-      material={gltf.materials["FrontColor.002"]}
-      position={[-7.3, 5.27, -0.6]}
+      geometry={gltf.nodes.Mesh105_G_3DGeom_8_5_G_3DGeom_8_4_G_3DGeom_8_3_Assembly_25_1_As.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[168.17, 2.95, -0.68]}
       rotation={[Math.PI / 2, 0, 0]}
     />
     <T.Mesh
-      geometry={gltf.nodes
-        .Mesh17_G_3DGeom_6_2_G_3DGeom_6_1_G_3DGeom_6_Assembly_19_Assembl
-        .geometry}
-      material={gltf.materials["FrontColor.002"]}
-      position={[-7.6, 5.25, -0.39]}
+      geometry={gltf.nodes.Mesh106_G_3DGeom_9_5_G_3DGeom_9_4_G_3DGeom_9_3_Assembly_28_1_As.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[164.36, 5.1, -0.81]}
       rotation={[Math.PI / 2, 0, 0]}
     />
     <T.Mesh
-      geometry={gltf.nodes
-        .Mesh18_G_3DGeom_7_2_G_3DGeom_7_1_G_3DGeom_7_Assembly_22_Assembl
-        .geometry}
-      material={gltf.materials["FrontColor.002"]}
-      position={[-8.51, 8.05, -0.68]}
+      geometry={gltf.nodes.Mesh107_G_3DGeom_10_5_G_3DGeom_10_4_G_3DGeom_10_3_Assembly_31_1.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[160.42, 1.9, -0.47]}
       rotation={[Math.PI / 2, 0, 0]}
     />
     <T.Mesh
-      geometry={gltf.nodes
-        .Mesh19_G_3DGeom_8_2_G_3DGeom_8_1_G_3DGeom_8_Assembly_25_Assembl
-        .geometry}
-      material={gltf.materials["FrontColor.002"]}
-      position={[-8, 2.95, -0.68]}
+      geometry={gltf.nodes.Mesh11_Group10_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[170.17, -0.07, -29]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh112_Group57_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[15, 16.82, 40]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh113_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[170.17, 0, -29]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh114_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[187.69, 5.77, 45.9]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh115_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[137.66, 2.9, 47.56]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh116_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[137.66, 6.1, 47.56]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh117_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[199.17, 0, -5]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh118_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[199.17, 0, -53]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh119_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[170.17, 0, -53]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh12_Group10_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[170.17, -0.07, -53]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh120_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[228.17, 0, -53]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh121_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[170.17, 0, -5]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh122_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[228.17, 0, -5]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh123_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[228.17, 0, -29]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh124_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[199.17, 0, -29]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh125_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[-15, 0.1, -40]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh126_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[-95, 0, 0]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh127_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[93.5, 0, 0]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh128_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[-55, 0, 0]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh13_Group10_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[228.17, -0.07, -53]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh130_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[15, 2.6, -70]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh131_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[5.89, 1.15, 2.82]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh132_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[69.85, 14.2, -40.11]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh133_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[17.11, 7.31, -42.11]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh134_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[-15, 2.7, -70]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh135_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[-55, 2.7, -70]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh136_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[-55, 15.2, -40]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh137_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[-95, 2.7, -70]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh138_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[-95, 20.2, -40]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh139_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[-95, 20.2, 40]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh14_Group10_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[199.17, -0.07, -53]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh140_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[-95, 2.7, 70]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh141_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[55, 2.7, -70]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh142_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[93.5, 2.7, -70]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh143_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[-55, 2.7, 70]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh144_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[-15, 2.7, 70]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh145_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[15, 2.7, 70]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh146_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[55, 2.7, 70]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh147_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[93.5, 2.7, 70]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh148_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[-55, 15.2, 40]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh149_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[-15, 0.2, 40]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh15_Group10_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[199.17, -0.07, -29]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh150_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[55, 12.7, 40]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh151_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[93.5, 17.2, 40]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh152_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[93.5, 8.04, -40]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh16_Group10_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[228.17, -0.07, -29]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh17_Group10_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[228.17, -0.07, -5]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh18_Group10_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[170.17, -0.07, -5]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh19_Group10_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[199.17, -0.07, -5]}
       rotation={[Math.PI / 2, 0, 0]}
     />
     <T.Mesh
       geometry={gltf.nodes.Mesh2_Group2_Model.geometry}
-      material={gltf.materials["FrontColor.002"]}
-      position={[14.1, 3.95, -0.28]}
+      material={gltf.materials['FrontColor.013']}
+      position={[177.67, 4.5, -7.6]}
       rotation={[Math.PI / 2, 0, 0]}
     />
     <T.Mesh
-      geometry={gltf.nodes
-        .Mesh20_G_3DGeom_9_2_G_3DGeom_9_1_G_3DGeom_9_Assembly_28_Assembl
-        .geometry}
-      material={gltf.materials["FrontColor.002"]}
-      position={[-11.81, 5.1, -0.81]}
+      geometry={gltf.nodes.Mesh20_Group10_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[197.53, -0.07, -30.43]}
       rotation={[Math.PI / 2, 0, 0]}
     />
     <T.Mesh
-      geometry={gltf.nodes
-        .Mesh21_G_3DGeom_10_2_G_3DGeom_10_1_G_3DGeom_10_Assembly_31_Asse
-        .geometry}
-      material={gltf.materials["FrontColor.002"]}
-      position={[-15.75, 1.9, -0.47]}
+      geometry={gltf.nodes.Mesh21_Group11_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[199.17, -0.2, -29]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh22_G_3DGeom_24_5_G_3DGeom_24_4_G_3DGeom_24_3_Assembly_73_1_.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[-85.61, 5.47, -9.99]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh23_G_3DGeom_24_8_G_3DGeom_24_7_G_3DGeom_24_6_Assembly_73_2_.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[-85.61, 5.47, 10.01]}
       rotation={[Math.PI / 2, 0, 0]}
     />
     <T.Mesh
       geometry={gltf.nodes.Mesh3_Group3_Model.geometry}
-      material={gltf.materials["FrontColor.002"]}
-      position={[2.24, 4.36, -0.15]}
-      rotation={[Math.PI / 2, 0, 0]}
-    />
-    <T.Mesh
-      geometry={gltf.nodes.Mesh37_Group12_Model.geometry}
-      material={gltf.materials["FrontColor.002"]}
-      position={[-6, -0.07, -29]}
-      rotation={[Math.PI / 2, 0, 0]}
-    />
-    <T.Mesh
-      geometry={gltf.nodes.Mesh38_Group12_Model.geometry}
-      material={gltf.materials["FrontColor.002"]}
-      position={[-6, -0.07, -53]}
-      rotation={[Math.PI / 2, 0, 0]}
-    />
-    <T.Mesh
-      geometry={gltf.nodes.Mesh39_Group12_Model.geometry}
-      material={gltf.materials["FrontColor.002"]}
-      position={[52, -0.07, -53]}
+      material={gltf.materials['FrontColor.013']}
+      position={[137.66, 4.5, 53.25]}
       rotation={[Math.PI / 2, 0, 0]}
     />
     <T.Mesh
       geometry={gltf.nodes.Mesh4_Group4_Model.geometry}
-      material={gltf.materials["FrontColor.002"]}
-      position={[1.5, 4.5, -7.6]}
-      rotation={[Math.PI / 2, 0, 0]}
-    />
-    <T.Mesh
-      geometry={gltf.nodes.Mesh40_Group12_Model.geometry}
-      material={gltf.materials["FrontColor.002"]}
-      position={[23, -0.07, -53]}
-      rotation={[Math.PI / 2, 0, 0]}
-    />
-    <T.Mesh
-      geometry={gltf.nodes.Mesh41_Group12_Model.geometry}
-      material={gltf.materials["FrontColor.002"]}
-      position={[23, -0.07, -29]}
-      rotation={[Math.PI / 2, 0, 0]}
-    />
-    <T.Mesh
-      geometry={gltf.nodes.Mesh42_Group12_Model.geometry}
-      material={gltf.materials["FrontColor.002"]}
-      position={[52, -0.07, -29]}
-      rotation={[Math.PI / 2, 0, 0]}
-    />
-    <T.Mesh
-      geometry={gltf.nodes.Mesh43_Group12_Model.geometry}
-      material={gltf.materials["FrontColor.002"]}
-      position={[52, -0.07, -5]}
-      rotation={[Math.PI / 2, 0, 0]}
-    />
-    <T.Mesh
-      geometry={gltf.nodes.Mesh44_Group12_Model.geometry}
-      material={gltf.materials["FrontColor.002"]}
-      position={[-6, -0.07, -5]}
-      rotation={[Math.PI / 2, 0, 0]}
-    />
-    <T.Mesh
-      geometry={gltf.nodes.Mesh45_Group12_Model.geometry}
-      material={gltf.materials["FrontColor.002"]}
-      position={[23, -0.07, -5]}
-      rotation={[Math.PI / 2, 0, 0]}
-    />
-    <T.Mesh
-      geometry={gltf.nodes.Mesh46_Group12_Model.geometry}
-      material={gltf.materials["FrontColor.002"]}
-      position={[21.36, -0.07, -30.43]}
-      rotation={[Math.PI / 2, 0, 0]}
-    />
-    <T.Mesh
-      geometry={gltf.nodes.Mesh47_Group13_Model.geometry}
-      material={gltf.materials["FrontColor.002"]}
-      position={[23, -0.2, -29]}
-      rotation={[Math.PI / 2, 0, 0]}
-    />
-    <T.Mesh
-      geometry={gltf.nodes.Mesh48_Model.geometry}
-      material={gltf.materials["FrontColor.002"]}
-      position={[23, 0, -29]}
-      rotation={[Math.PI / 2, 0, 0]}
-    />
-    <T.Mesh
-      geometry={gltf.nodes.Mesh49_Model.geometry}
-      material={gltf.materials["FrontColor.002"]}
-      position={[-6, 0, -29]}
+      material={gltf.materials['FrontColor.013']}
+      position={[137.66, 1.3, 47.56]}
       rotation={[Math.PI / 2, 0, 0]}
     />
     <T.Mesh
       geometry={gltf.nodes.Mesh5_Group5_Model.geometry}
-      material={gltf.materials["FrontColor.002"]}
-      position={[-19.3, 4.5, 56.32]}
+      material={gltf.materials['FrontColor.013']}
+      position={[137.66, 4.3, 47.56]}
       rotation={[Math.PI / 2, 0, 0]}
     />
     <T.Mesh
-      geometry={gltf.nodes.Mesh50_Model.geometry}
-      material={gltf.materials["FrontColor.002"]}
-      position={[11.52, 5.77, 45.9]}
-      rotation={[Math.PI / 2, 0, 0]}
-    />
-    <T.Mesh
-      geometry={gltf.nodes.Mesh51_Model.geometry}
-      material={gltf.materials["FrontColor.002"]}
-      position={[-19.3, 2.9, 50.62]}
-      rotation={[Math.PI / 2, 0, 0]}
-    />
-    <T.Mesh
-      geometry={gltf.nodes.Mesh52_Model.geometry}
-      material={gltf.materials["FrontColor.002"]}
-      position={[-19.3, 6.1, 50.62]}
-      rotation={[Math.PI / 2, 0, 0]}
-    />
-    <T.Mesh
-      geometry={gltf.nodes.Mesh53_Model.geometry}
-      material={gltf.materials["FrontColor.002"]}
-      position={[52, 0, -29]}
-      rotation={[Math.PI / 2, 0, 0]}
-    />
-    <T.Mesh
-      geometry={gltf.nodes.Mesh54_Model.geometry}
-      material={gltf.materials["FrontColor.002"]}
-      position={[23, 0, -5]}
-      rotation={[Math.PI / 2, 0, 0]}
-    />
-    <T.Mesh
-      geometry={gltf.nodes.Mesh55_Model.geometry}
-      material={gltf.materials["FrontColor.002"]}
-      position={[23, 0, -53]}
-      rotation={[Math.PI / 2, 0, 0]}
-    />
-    <T.Mesh
-      geometry={gltf.nodes.Mesh56_Model.geometry}
-      material={gltf.materials["FrontColor.002"]}
-      position={[-6, 0, -53]}
-      rotation={[Math.PI / 2, 0, 0]}
-    />
-    <T.Mesh
-      geometry={gltf.nodes.Mesh57_Model.geometry}
-      material={gltf.materials["FrontColor.002"]}
-      position={[52, 0, -53]}
-      rotation={[Math.PI / 2, 0, 0]}
-    />
-    <T.Mesh
-      geometry={gltf.nodes.Mesh58_Model.geometry}
-      material={gltf.materials["FrontColor.002"]}
-      position={[-6, 0, -5]}
-      rotation={[Math.PI / 2, 0, 0]}
-    />
-    <T.Mesh
-      geometry={gltf.nodes.Mesh59_Model.geometry}
-      material={gltf.materials["FrontColor.002"]}
-      position={[52, 0, -5]}
+      geometry={gltf.nodes.Mesh54_G_3DGeom_24_11_G_3DGeom_24_10_G_3DGeom_24_9_Assembly_73_.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[-35.61, 5.47, 0.01]}
       rotation={[Math.PI / 2, 0, 0]}
     />
     <T.Mesh
       geometry={gltf.nodes.Mesh6_Group6_Model.geometry}
-      material={gltf.materials["FrontColor.002"]}
-      position={[-19.3, 1.3, 50.62]}
+      material={gltf.materials['FrontColor.013']}
+      position={[137.66, 8.57, 46.35]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh69_Group46_Group45_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[20.45, 24.2, -40]}
       rotation={[Math.PI / 2, 0, 0]}
     />
     <T.Mesh
       geometry={gltf.nodes.Mesh7_Group7_Model.geometry}
-      material={gltf.materials["FrontColor.002"]}
-      position={[-19.3, 4.3, 50.62]}
+      material={gltf.materials['FrontColor.013']}
+      position={[140.2, 7.5, 45.69]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh70_Group47_Group45_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[9.55, 25.25, -40]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh71_Group48_Group45_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[15, 13.37, -36.05]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh72_Group45_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[14.77, 21.69, -38.81]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh73_D_1_00_m_Group49_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[42.45, 25.95, -40.22]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh74_D_1_00_m1_Group49_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[40.06, 23.62, -40.83]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh75_D_1_00_m2_Group49_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[39.67, 22.66, -30.8]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh76_D_1_00_m4_D_1_00_m3_Group49_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[43.84, 25.6, -31.25]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh77_Group49_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[37.6, 20.13, -34.29]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh78_Group49_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[40, 7.41, -40.95]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh79_Group49_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[39.75, 11.7, -29]}
       rotation={[Math.PI / 2, 0, 0]}
     />
     <T.Mesh
       geometry={gltf.nodes.Mesh8_Group8_Model.geometry}
-      material={gltf.materials["FrontColor.002"]}
-      position={[-19.3, 8.57, 49.41]}
+      material={gltf.materials['FrontColor.013']}
+      position={[140.2, 4.4, 49.44]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh80_Group49_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[39.75, 7.95, -29]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh81_Group49_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[39.75, 4.45, -29]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh82_D_0_30_m_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[19.5, 4.2, 0]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh83_D_0_30_m1_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[22.31, 2.7, -4.95]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh84_D_0_30_m2_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[22.31, 2.7, 4.95]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh85_G_3DGeom_1_2_G_3DGeom_1_1_G_3DGeom_1_Assembly_4_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[-19.78, 5.13, 31.79]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh86_G_3DGeom_2_2_G_3DGeom_2_1_G_3DGeom_2_Assembly_7_Assembly.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[-24.1, 4.4, 30.49]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh87_G_3DGeom_3_2_G_3DGeom_3_1_G_3DGeom_3_Assembly_10_Assembl.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[-19.42, 6.09, 30.84]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh88_G_3DGeom_4_2_G_3DGeom_4_1_G_3DGeom_4_Assembly_13_Assembl.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[-17, 1.7, 30.73]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh89_G_3DGeom_5_2_G_3DGeom_5_1_G_3DGeom_5_Assembly_16_Assembl.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[-23.7, 5.47, 30.63]}
       rotation={[Math.PI / 2, 0, 0]}
     />
     <T.Mesh
       geometry={gltf.nodes.Mesh9_Group9_Model.geometry}
-      material={gltf.materials["FrontColor.002"]}
-      position={[-16.77, 7.5, 48.75]}
+      material={gltf.materials['FrontColor.013']}
+      position={[139.04, 12.24, 44.73]}
       rotation={[Math.PI / 2, 0, 0]}
     />
     <T.Mesh
-      geometry={gltf.nodes.Curve002.geometry}
-      material={gltf.materials["SVGMat.029"]}
-      position={[-38.77, 0.03, -0.35]}
-    />
-    <T.Mesh
-      geometry={gltf.nodes.Curve006.geometry}
-      material={gltf.materials["SVGMat.029"]}
-      position={[-38.55, 0.05, -0.34]}
-    />
-    <T.Mesh
-      geometry={gltf.nodes.Curve007.geometry}
-      material={gltf.materials["SVGMat.029"]}
-      position={[-38.43, 0.05, -0.36]}
-    />
-    <T.Mesh
-      geometry={gltf.nodes.Curve010.geometry}
-      material={gltf.materials["SVGMat.029"]}
-      position={[-38.32, 0.05, -0.34]}
-    />
-    <T.Mesh
-      geometry={gltf.nodes
-        .Mesh24_G_3DGeom_18_2_G_3DGeom_18_1_G_3DGeom_18_Assembly_55_Mode
-        .geometry}
-      material={gltf.materials["FrontColor.002"]}
-      position={[49.84, 16.14, -32.74]}
+      geometry={gltf.nodes.Mesh90_G_3DGeom_6_2_G_3DGeom_6_1_G_3DGeom_6_Assembly_19_Assembl.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[-23.4, 5.45, 30.42]}
       rotation={[Math.PI / 2, 0, 0]}
     />
     <T.Mesh
-      geometry={gltf.nodes
-        .Mesh30_G_3DGeom_17_2_G_3DGeom_17_1_G_3DGeom_17_Assembly_52_Mode
-        .geometry}
-      material={gltf.materials["FrontColor.002"]}
-      position={[54.16, 16.14, -32.74]}
+      geometry={gltf.nodes.Mesh91_G_3DGeom_7_2_G_3DGeom_7_1_G_3DGeom_7_Assembly_22_Assembl.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[-22.49, 8.25, 30.7]}
       rotation={[Math.PI / 2, 0, 0]}
     />
     <T.Mesh
-      geometry={gltf.nodes.Mesh33_G_3DGeom_11_2_G_3DGeom_11_1_G_3DGeom_11_Model
-        .geometry}
-      material={gltf.materials["Material.001"]}
-      position={[50.67, 12.7, -29.02]}
-      rotation={[Math.PI / 2, 0, 0]}
-    >
-      <Outlines color="white" />
-      <Outlines color="hotpink" thickness={0.05} />
-      <Outlines color="yellow" thickness={0.1} />
-    </T.Mesh>
-    <T.Mesh
-      geometry={gltf.nodes
-        .Mesh34_G_3DGeom_19_2_G_3DGeom_19_1_G_3DGeom_19_Assembly_58_Mode
-        .geometry}
-      material={gltf.materials["FrontColor.002"]}
-      position={[54.16, 16.14, -25.26]}
+      geometry={gltf.nodes.Mesh92_G_3DGeom_8_2_G_3DGeom_8_1_G_3DGeom_8_Assembly_25_Assembl.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[-23, 3.15, 30.7]}
       rotation={[Math.PI / 2, 0, 0]}
     />
     <T.Mesh
-      geometry={gltf.nodes
-        .Mesh35_G_3DGeom_16_2_G_3DGeom_16_1_G_3DGeom_16_Assembly_49_Mode
-        .geometry}
-      material={gltf.materials["FrontColor.002"]}
-      position={[49.84, 16.14, -25.26]}
+      geometry={gltf.nodes.Mesh93_G_3DGeom_9_2_G_3DGeom_9_1_G_3DGeom_9_Assembly_28_Assembl.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[-19.19, 5.3, 30.84]}
       rotation={[Math.PI / 2, 0, 0]}
     />
     <T.Mesh
-      geometry={gltf.nodes.Bolata_Light_1.geometry}
-      material={gltf.materials["FrontColor.002"]}
-      position={[52.2, 10.71, -29]}
+      geometry={gltf.nodes.Mesh94_G_3DGeom_10_2_G_3DGeom_10_1_G_3DGeom_10_Assembly_31_Asse.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[-15.25, 2.1, 30.49]}
       rotation={[Math.PI / 2, 0, 0]}
-    >
-      <FakeGlowMaterial glowColor={"#5500ff"} depthTest={true} />
-    </T.Mesh>
+    />
     <T.Mesh
-      geometry={gltf.nodes.Bolata_Light_2.geometry}
-      material={gltf.materials["FrontColor.002"]}
-      position={[48.03, 17.13, -28.96]}
+      geometry={gltf.nodes.Mesh95_Group50_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[-15.08, 10.22, -37.3]}
       rotation={[Math.PI / 2, 0, 0]}
-    >
-      <FakeGlowMaterial glowColor={"purple"} depthTest={true} />
-    </T.Mesh>
+    />
     <T.Mesh
-      geometry={gltf.nodes.Bolata_Light_3.geometry}
-      material={gltf.materials["FrontColor.002"]}
-      position={[48.38, 3.77, -28.99]}
+      geometry={gltf.nodes.Mesh96_Group51_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[178.41, 4.36, -0.15]}
       rotation={[Math.PI / 2, 0, 0]}
-    >
-      <FakeGlowMaterial glowColor={"blue"} depthTest={true} />
-    </T.Mesh>
-
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh97_Group52_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[190.27, 3.95, -0.28]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh98_G_3DGeom_1_5_G_3DGeom_1_4_G_3DGeom_1_3_Assembly_4_1_Mode.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[164.95, 4.93, -1.77]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh99_G_3DGeom_2_5_G_3DGeom_2_4_G_3DGeom_2_3_Assembly_7_1_Asse.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[169.27, 4.2, -0.46]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh129_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[-0.75, -0.9, 0]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh24_Group12_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[93.5, 0.1, 70]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh25_Group13_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[93.5, 0.1, 40]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh26_Group14_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[93.5, 0.1, 0]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh27_Group15_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[93.5, 0.1, -40]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh28_Group16_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[93.5, 0.1, -70]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh29_Group17_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[55, 0.1, -70]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh30_Group18_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[55, 0.1, -40]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh31_Group19_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[55, 0.1, 0]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh32_Group20_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[55, 0.1, 40]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh33_Group21_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[55, 0.1, 70]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh34_Group22_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[-15, 0.1, -70]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh35_Group23_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[-15, 0.1, -40]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh36_Group24_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[0, 0.1, 0]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh37_Group25_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[15, 0.1, 40]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh38_Group26_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[15, 0.1, 70]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh39_Group27_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[-15, 0.1, 40]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh40_Group28_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[-15, 0.1, 70]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh41_Group29_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[-55, 0.1, 70]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh42_Group30_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[-95, 0.1, 70]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh43_Group31_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[-95, 0.1, 40]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh44_Group32_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[-55, 0.1, 40]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh45_Group33_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[-95, 0.1, 0]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh46_Group34_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[-95, 0.1, -40]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh47_Group35_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[-95, 0.1, -70]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh48_Group36_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[-55, 0.1, -70]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh49_Group37_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[-55, 0.1, -40]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh50_Group38_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[-55, 0.1, 0]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh51_Group39_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[15, 0.1, -40]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh52_Group43_Group42_Group41_Group40_Model.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[15, 0.1, -70]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Bolta_Tower_Colums.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[55, 3.41, 0]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Bolta_tower_Ground.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[62.06, 0.2, -2.09]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Bolta_Tower_Light_1.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[52.31, 18.8, -4.65]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Bolta_Tower_Principal_Light_1.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[49.05, 31.03, 0.06]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Bolta_Tower_Light_4.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[57.53, 20, -4.38]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Bolta_Tower_Light_3.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[57.53, 20, 4.38]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh61_G_3DGeom_18_2_G_3DGeom_18_1_G_3DGeom_18_Assembly_55_Mode.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[51.76, 29.26, -5.61]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh62_G_3DGeom_17_2_G_3DGeom_17_1_G_3DGeom_17_Assembly_52_Mode.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[58.23, 29.26, -5.61]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Mesh63_G_3DGeom_19_2_G_3DGeom_19_1_G_3DGeom_19_Assembly_58_Mode.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[58.25, 29.26, 5.61]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Bolta_Tower_Light_2.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[52.31, 18.8, 4.65]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
     <T.Group
-      position={[48.11, 8.57, -28.95]}
-      rotation={[Math.PI / 2, 0, Math.PI / 2]}
-      scale={6.01}
+      position={[52.68, 23.27, -0.05]}
+      rotation={[Math.PI / 2, 0, 0]}
     >
       <T.Mesh
-        geometry={gltf.nodes.Bolta_1.geometry}
-        material={gltf.materials["SVGMat.029"]}
-      >
-        <FakeGlowMaterial glowColor="white" depthTest={true} />
-      </T.Mesh>
+        geometry={gltf.nodes.Mesh66_G_3DGeom_11_2_G_3DGeom_11_1_G_3DGeom_11_Model004.geometry}
+        material={gltf.materials.Material}
+      />
       <T.Mesh
-        geometry={gltf.nodes.Bolta_2.geometry}
-        material={gltf.materials["SVGMat.029"]}
-      >
-        <FakeGlowMaterial glowColor="white" depthTest={true} />
-      </T.Mesh>
-      <T.Mesh
-        geometry={gltf.nodes.Bolta_3.geometry}
-        material={gltf.materials["SVGMat.029"]}
-      >
-        <FakeGlowMaterial glowColor="white" depthTest={true} />
-      </T.Mesh>
-      <T.Mesh
-        geometry={gltf.nodes.Bolta_4.geometry}
-        material={gltf.materials["SVGMat.029"]}
-      >
-        <FakeGlowMaterial glowColor="white" depthTest={true} />
-      </T.Mesh>
-      <T.Mesh
-        geometry={gltf.nodes.Bolta_5.geometry}
-      >
-        <FakeGlowMaterial glowColor="white" depthTest={true} />
-      </T.Mesh>
+        geometry={gltf.nodes.Mesh66_G_3DGeom_11_2_G_3DGeom_11_1_G_3DGeom_11_Model004_1.geometry}
+        material={gltf.materials['Material.001']}
+      />
     </T.Group>
+    <T.Mesh
+      geometry={gltf.nodes.Mesh68_G_3DGeom_16_2_G_3DGeom_16_1_G_3DGeom_16_Assembly_49_Mode.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[51.76, 29.26, 5.61]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Bolta_tower_2nd_flor.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[60.68, 4.17, 0.15]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    <T.Mesh
+      geometry={gltf.nodes.Bolta_Tower_Principal_Light_2.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[49.46, 13.82, 0.06]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+  <AutoColliders shape="convexHull">
+    <T.Mesh
+      geometry={gltf.nodes.Ground.geometry}
+      material={gltf.materials['FrontColor.013']}
+      position={[-0.79, 0, 2.37]}
+      rotation={[Math.PI / 2, 0, 0]}
+    />
+    </AutoColliders>
   {:catch err}
     {@render error?.({ error: err })}
   {/await}

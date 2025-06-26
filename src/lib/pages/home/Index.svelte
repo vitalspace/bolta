@@ -1,18 +1,12 @@
 <script>
   import { Canvas } from "@threlte/core";
+  import { AutoValue, Pane } from "svelte-tweakpane-ui";
+  import { World, Debug } from "@threlte/rapier";
   import Scene from "./Scene.svelte";
-  import {
-    Checkbox,
-    Folder,
-    List,
-    Pane,
-    Slider,
-    AutoValue,
-  } from "svelte-tweakpane-ui";
 
   let position = $state({
     x: 0,
-    y: 0,
+    y: 150,
     z: 0,
   });
 
@@ -26,27 +20,28 @@
     x: 0,
     y: 0,
     z: 0,
-  })
+  });
 
+  let debug = $state(true);
 </script>
 
 <div class="bg-gray-900">
-  <!-- <div class="absolute z-10 inset-0 flex items-center justify-center ">  
-    <h1>Hello world</h1>
-  </div> -->
-
   <div>
     <Pane position="fixed" title="CubeCamera">
       <AutoValue bind:value={position} label="Position" />
       <AutoValue bind:value={rotation} label="Rotation" />
       <AutoValue bind:value={lookAt} label="LookAt" />
-
     </Pane>
   </div>
 
   <div class="h-screen">
     <Canvas>
-      <Scene {position} {rotation} {lookAt} />
+      <World>
+        {#if debug}
+          <Debug />
+        {/if}
+        <Scene {position} {rotation} {lookAt} />
+      </World>
     </Canvas>
   </div>
 </div>
