@@ -2,7 +2,8 @@
   import { T, useTask } from "@threlte/core";
   import { AutoColliders } from "@threlte/rapier";
   import { FakeGlowMaterial, HTML } from "@threlte/extras";
-  import { keys, gameState } from "../../stores/stores";
+  import { keys, showAlgorandDialog } from "../../stores/stores";
+  import { gameActions } from "../../stores/stores";
   import { Wallet } from "@lucide/svelte";
 
   let isPlayerNear = $state(false);
@@ -24,11 +25,7 @@
     
     if (currentEPressed && !lastEPressed && isPlayerNear) {
       console.log("Opening Algorand dialog");
-      // Actualizar el estado global para mostrar el diálogo
-      gameState.update(state => ({
-        ...state,
-        showAlgorandDialog: true
-      }));
+      gameActions.showAlgorandDialog();
     }
     
     lastEPressed = currentEPressed;
@@ -55,9 +52,9 @@
     </T.Mesh>
   </AutoColliders>
 
-  <!-- Floating Icon -->
+  <!-- Floating Icon - Se oculta cuando el diálogo está abierto -->
   <T.Group position={[0, 1.5, 0]} rotation={[0, 0, 0]}>
-    <HTML transform occlude={true}>
+    <HTML transform occlude={$showAlgorandDialog}>
       <div class="flex flex-col items-center pointer-events-none">
         <!-- Algorand Icon -->
         <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-2 animate-bounce">
