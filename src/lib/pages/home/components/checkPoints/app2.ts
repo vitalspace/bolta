@@ -123,13 +123,8 @@ class App {
         throw new Error("No hay cuenta conectada");
       }
 
-      // Aumentar el fee para cubrir las transacciones internas
-      params.fee = algosdk.algosToMicroalgos(0.002); // 2000 microAlgos
-      params.flatFee = true;
-
-      console.log("Parámetros de transacción:", {
+      console.log("Parámetros de transacción originales:", {
         fee: params.fee,
-        flatFee: params.flatFee,
         firstValid: params.firstRound,
         lastValid: params.lastRound
       });
@@ -224,75 +219,78 @@ class App {
     console.log("Creando NFT...");
 
     try {
-      const params = await algoclient.getTransactionParams().do();
       const connectedAccount = this.getConnectedAccount();
 
       if (!connectedAccount) {
         throw new Error("No hay cuenta conectada");
       }
 
-      // Verificar si la cuenta ya hizo opt-in a la aplicación
-      try {
-        const accountInfo = await algoclient.accountInformation(connectedAccount).do();
-        const hasOptedIn = accountInfo['apps-local-state']?.some((app: any) => app.id === appId);
-        
-        if (!hasOptedIn) {
-          console.log("Realizando opt-in a la aplicación primero...");
-          await this.optInApp(appId);
-          console.log("Opt-in completado, procediendo con la creación del NFT...");
-          
-          // Esperar un poco para que la transacción se confirme
-          await new Promise(resolve => setTimeout(resolve, 2000));
-        }
-      } catch (optInError) {
-        console.log("Error verificando opt-in, intentando opt-in:", optInError);
-        try {
-          await this.optInApp(appId);
-          await new Promise(resolve => setTimeout(resolve, 2000));
-        } catch (optInRetryError) {
-          console.log("Opt-in falló, continuando con la creación del NFT...");
-        }
+      // Verificar el balance de la cuenta
+      const accountInfo = await algoclient.accountInformation(connectedAccount).do();
+      const balance = accountInfo.amount;
+      console.log("Balance de la cuenta:", balance, "microAlgos");
+
+      if (balance < 1000000) { // Menos de 1 ALGO
+        throw new Error("Balance insuficiente. Se necesita al menos 1 ALGO para crear NFTs.");
       }
 
-      // Usar el método ABI con fee aumentado
-      console.log("Llamando método nonFungibleAssetCreateAndSend usando ABI...");
+      // Verificar si la cuenta ya hizo opt-in a la aplicación
+      const hasOptedIn = accountInfo['apps-local-state']?.some((app: any) => app.id === appId);
       
-      // Crear una transacción de pago adicional para cubrir los costos
-      const paymentParams = await algoclient.getTransactionParams().do();
-      paymentParams.fee = algosdk.algosToMicroalgos(0.003); // 3000 microAlgos para cubrir múltiples transacciones internas
-      paymentParams.flatFee = true;
+      if (!hasOptedIn) {
+        console.log("Realizando opt-in a la aplicación primero...");
+        await this.optInApp(appId);
+        console.log("Opt-in completado, esperando confirmación...");
+        
+        // Esperar un poco más para que la transacción se confirme
+        await new Promise(resolve => setTimeout(resolve, 3000));
+      } else {
+        console.log("La cuenta ya tiene opt-in a la aplicación");
+      }
 
-      const result = await this.executeABIMethod("nonFungibleAssetCreateAndSend", [], {
-        suggestedParams: paymentParams
-      });
+      // Intentar crear el NFT directamente sin ABI primero
+      console.log("Intentando crear NFT con llamada directa...");
+      const result = await this.createNFTDirect();
       
       console.log("NFT creado exitosamente:", result);
       return result;
 
     } catch (error) {
       console.error("Error detallado al crear NFT:", error);
-      
-      // Si el error es de fee, intentar con un fee aún mayor
-      if (error.message && error.message.includes("fee too small")) {
-        console.log("Error de fee detectado, intentando con fee mayor...");
-        try {
-          const params = await algoclient.getTransactionParams().do();
-          params.fee = algosdk.algosToMicroalgos(0.005); // 5000 microAlgos
-          params.flatFee = true;
-          
-          const retryResult = await this.executeABIMethod("nonFungibleAssetCreateAndSend", [], {
-            suggestedParams: params
-          });
-          console.log("NFT creado exitosamente con fee mayor:", retryResult);
-          return retryResult;
-        } catch (retryError) {
-          console.error("Error en segundo intento con fee mayor:", retryError);
-          throw retryError;
-        }
-      }
-      
       throw error;
     }
+  }
+
+  async createNFTDirect() {
+    const params = await algoclient.getTransactionParams().do();
+    const connectedAccount = this.getConnectedAccount();
+
+    if (!connectedAccount) {
+      throw new Error("No hay cuenta conectada");
+    }
+
+    // Aumentar el fee significativamente para cubrir las transacciones internas
+    params.fee = 10000; // 0.01 ALGO
+    params.flatFee = true;
+
+    console.log("Creando NFT con parámetros:", {
+      fee: params.fee,
+      flatFee: params.flatFee,
+      sender: connectedAccount
+    });
+
+    const txn = algosdk.makeApplicationCallTxnFromObject({
+      sender: connectedAccount,
+      suggestedParams: params,
+      appIndex: appId,
+      onComplete: algosdk.OnApplicationComplete.NoOpOC,
+      appArgs: [
+        new Uint8Array(Buffer.from("nonFungibleAssetCreateAndSend"))
+      ],
+    });
+
+    const result = await this.compileAndSendTxn(txn);
+    return result;
   }
 
   async optInApp(id: number) {
@@ -305,8 +303,8 @@ class App {
       throw new Error("No hay cuenta conectada");
     }
 
-    // Aumentar el fee para el opt-in también
-    params.fee = algosdk.algosToMicroalgos(0.001); // 1000 microAlgos
+    // Usar fee estándar para opt-in
+    params.fee = 1000;
     params.flatFee = true;
 
     const optInTxn = algosdk.makeApplicationOptInTxnFromObject({
@@ -315,16 +313,9 @@ class App {
       appIndex: appId,
     });
 
-    // Enviar la transacción firmada con Pera Wallet
-    const signedTxn = await this.signTransaction.bind(this)([optInTxn], [0]);
-
-    const txId = optInTxn.txID().toString();
-
-    await algoclient.sendRawTransaction(signedTxn).do();
-    await algosdk.waitForConfirmation(algoclient, txId, 3);
-
-    console.log("Opt-in exitoso. TxID:", txId);
-    return txId;
+    const result = await this.compileAndSendTxn(optInTxn);
+    console.log("Opt-in exitoso. TxID:", result.txn.txn.tx);
+    return result;
   }
 }
 
