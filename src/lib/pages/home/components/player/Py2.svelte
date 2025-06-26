@@ -27,6 +27,8 @@ Command: npx @threlte/gltf@3.0.1 .\man.glb -T --draco /draco/
   export const { actions, mixer } = useGltfAnimations(gltf, ref);
   const { camera } = useThrelte();
 
+  console.log(actions)
+
   let isActive = $derived(!$isInVehicle);
   let isVisible = $derived($playerVisible);
   const v3 = new Vector3();
