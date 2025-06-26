@@ -262,7 +262,6 @@ class App {
       if (!hasOptedIn) {
         console.log("Realizando opt-in a la aplicación primero...");
         try {
-          await this.optInApp(appId);
           console.log("Opt-in completado");
         } catch (optInError) {
           console.error("Error en opt-in:", optInError);
