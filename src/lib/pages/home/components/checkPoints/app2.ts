@@ -203,7 +203,7 @@ class App {
       appIndex: appId,
       onComplete: algosdk.OnApplicationComplete.NoOpOC,
       //@ts-ignore
-      appArgs: [new Uint8Array(Buffer.from("fungibleAssetCreate"))],
+      appArgs: [new TextEncoder().encode("fungibleAssetCreate")],
     });
 
     const result = await this.compileAndSendTxn(txn);
@@ -263,7 +263,7 @@ class App {
         suggestedParams: params,
         appIndex: appId,
         onComplete: algosdk.OnApplicationComplete.NoOpOC,
-        appArgs: [new Uint8Array(Buffer.from("nonFungibleAssetCreateAndSend"))],
+        appArgs: [new TextEncoder().encode("nonFungibleAssetCreateAndSend")],
       });
 
       const result = await this.signTransaction([txn], [0]);
