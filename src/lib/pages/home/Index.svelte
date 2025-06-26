@@ -3,6 +3,7 @@
   import { AutoValue, Pane } from "svelte-tweakpane-ui";
   import { World, Debug } from "@threlte/rapier";
   import Scene from "./Scene.svelte";
+  import VehicleUI from "./components/ui/VehicleUI.svelte";
 
   let position = $state({
     x: 0,
@@ -25,7 +26,7 @@
   let debug = $state(true);
 </script>
 
-<div class="bg-gray-900">
+<div class="bg-gray-900 relative">
   <div>
     <Pane position="fixed" title="CubeCamera">
       <AutoValue bind:value={position} label="Position" />
@@ -44,4 +45,7 @@
       </World>
     </Canvas>
   </div>
+
+  <!-- Vehicle UI rendered outside Canvas -->
+  <VehicleUI />
 </div>
