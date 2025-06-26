@@ -64,6 +64,18 @@ function checkCanEnterVehicle(playerPos: [number, number, number], vehicles: Veh
   return nearby.length > 0;
 }
 
+// Enhanced helper function for high-speed scenarios
+function checkCanEnterVehicleExtended(playerPos: [number, number, number], vehicles: Vehicle[], controlMode: string): boolean {
+  if (controlMode !== "player") return false;
+  
+  const nearby = vehicles.filter((vehicle) => {
+    const distance = calculateDistance(vehicle.position, playerPos);
+    return distance < 8; // Extended range for high-speed scenarios
+  });
+  
+  return nearby.length > 0;
+}
+
 export const gameActions = {
   registerVehicle: (vehicle: Vehicle) => {
     gameState.update((state) => {
@@ -213,6 +225,21 @@ export const gameActions = {
     });
   },
 
+  // New action for forced vehicle entry (for high-speed scenarios)
+  forceEnterVehicle: (vehicle: Vehicle) => {
+    gameState.update((state) => {
+      console.log("Force entering vehicle:", vehicle.id);
+      console.log("Player will be hidden");
+      
+      return {
+        ...state,
+        currentVehicle: vehicle,
+        controlMode: "vehicle",
+        canEnterVehicle: false,
+      };
+    });
+  },
+
   exitVehicle: () => {
     gameState.update((state) => {
       if (!state.currentVehicle) {
@@ -270,22 +297,34 @@ export const gameActions = {
     });
   },
 
-  // New action to force recalculation of canEnterVehicle (for debugging)
+  // Enhanced action to force recalculation of canEnterVehicle (for debugging and high-speed scenarios)
   forceRecalculateCanEnter: () => {
     gameState.update((state) => {
-      const newCanEnter = checkCanEnterVehicle(
+      const normalRange = checkCanEnterVehicle(
         state.playerPosition, 
         state.nearbyVehicles, 
         state.controlMode
       );
       
-      console.log("Force recalculate - canEnterVehicle:", newCanEnter);
+      const extendedRange = checkCanEnterVehicleExtended(
+        state.playerPosition, 
+        state.nearbyVehicles, 
+        state.controlMode
+      );
+      
+      console.log("Force recalculate - Normal range:", normalRange, "Extended range:", extendedRange);
       console.log("Player position:", state.playerPosition);
       console.log("Vehicles:", state.nearbyVehicles.length);
       
+      // Log all vehicle distances
+      state.nearbyVehicles.forEach((vehicle, index) => {
+        const distance = calculateDistance(state.playerPosition, vehicle.position);
+        console.log(`Force check - Vehicle ${index} (${vehicle.id}) distance:`, distance.toFixed(2));
+      });
+      
       return {
         ...state,
-        canEnterVehicle: newCanEnter
+        canEnterVehicle: normalRange
       };
     });
   },
