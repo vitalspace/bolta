@@ -1,8 +1,23 @@
 <script lang="ts">
-    import { T } from "@threlte/core"
-      import { AutoColliders, Collider, RigidBody } from "@threlte/rapier";
-    import { FakeGlowMaterial, HTML, useDraco, useGltf } from "@threlte/extras";
+  import { T, useTask} from "@threlte/core"
+  import { AutoColliders, Collider, RigidBody } from "@threlte/rapier";
+  import { FakeGlowMaterial, HTML, useDraco, useGltf } from "@threlte/extras";
+  import { keys } from "../../stores/stores";
 
+  console.log(keys)
+
+  let isEnter = $state();
+
+  const  handleEnter = () => {
+      isEnter = true
+  }
+
+  useTask(() => {
+
+  
+    
+  })
+  
 </script>
 
 
