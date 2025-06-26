@@ -4,7 +4,7 @@
   import { FakeGlowMaterial, HTML, useDraco, useGltf } from "@threlte/extras";
   import { keys } from "../../stores/stores";
 
-  console.log(keys)
+  console.log($keys)
 
   let isEnter = $state();
 
