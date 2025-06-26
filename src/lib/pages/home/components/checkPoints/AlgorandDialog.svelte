@@ -48,9 +48,6 @@
         }
       } catch (error) {
         console.error("Failed to connect wallet:", error);
-        alert(
-          "Error al conectar la wallet. Asegúrate de tener Pera Wallet instalada."
-        );
       } finally {
         isConnecting = false;
       }
@@ -64,17 +61,16 @@
 
   const createNFT = async () => {
     if (!isConnected) {
-      alert("Primero debes conectar tu wallet");
+      console.error("Primero debes conectar tu wallet");
       return;
     }
 
     try {
       isCreatingNFT = true;
       await app.createNFT();
-      alert("¡NFT creado exitosamente!");
+      console.log("¡NFT creado exitosamente!");
     } catch (error) {
       console.error("Error creating NFT:", error);
-      alert("Error al crear el NFT. Revisa la consola para más detalles.");
     } finally {
       isCreatingNFT = false;
     }
