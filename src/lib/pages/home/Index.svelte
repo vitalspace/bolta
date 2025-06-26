@@ -4,6 +4,8 @@
   import { World, Debug } from "@threlte/rapier";
   import Scene from "./Scene.svelte";
   import VehicleUI from "./components/ui/VehicleUI.svelte";
+  import AlgorandDialog from "./components/checkPoints/AlgorandDialog.svelte";
+  import { showAlgorandDialog, gameActions } from "./stores/stores";
 
   let position = $state({
     x: 0,
@@ -24,6 +26,10 @@
   });
 
   let debug = $state(true);
+
+  const closeAlgorandDialog = () => {
+    gameActions.hideAlgorandDialog();
+  };
 </script>
 
 <div class="bg-gray-900 relative">
@@ -48,4 +54,7 @@
 
   <!-- Vehicle UI rendered outside Canvas -->
   <VehicleUI />
+
+  <!-- Algorand Dialog rendered outside Canvas -->
+  <AlgorandDialog bind:isOpen={$showAlgorandDialog} onClose={closeAlgorandDialog} />
 </div>

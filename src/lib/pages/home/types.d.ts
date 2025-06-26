@@ -17,4 +17,5 @@ export interface GameState {
   playerReference: Group | null;
   vehicleExitPosition: [number, number, number] | null;
   vehicleSensorStates: Map<string, boolean>; // New: Track sensor states for each vehicle
+  showAlgorandDialog: boolean; // New: Control Algorand dialog visibility
 }

@@ -2,12 +2,10 @@
   import { T, useTask } from "@threlte/core";
   import { AutoColliders } from "@threlte/rapier";
   import { FakeGlowMaterial, HTML } from "@threlte/extras";
-  import { keys } from "../../stores/stores";
-  import AlgorandDialog from "./AlgorandDialog.svelte";
+  import { keys, gameState } from "../../stores/stores";
   import { Wallet } from "@lucide/svelte";
 
   let isPlayerNear = $state(false);
-  let showDialog = $state(false);
   let lastEPressed = $state(false);
 
   const handleEnter = () => {
@@ -20,22 +18,17 @@
     console.log("Player exited Algorand checkpoint area");
   };
 
-  const openDialog = () => {
-    showDialog = true;
-  };
-
-  const closeDialog = () => {
-    showDialog = false;
-  };
-
   useTask(() => {
     // Detectar cuando se presiona E por primera vez (edge detection)
     const currentEPressed = $keys.e.isPressed;
     
     if (currentEPressed && !lastEPressed && isPlayerNear) {
-    
-        console.log("me cumplo")
-      openDialog();
+      console.log("Opening Algorand dialog");
+      // Actualizar el estado global para mostrar el diálogo
+      gameState.update(state => ({
+        ...state,
+        showAlgorandDialog: true
+      }));
     }
     
     lastEPressed = currentEPressed;
@@ -104,6 +97,3 @@
     {/each}
   </T.Group>
 </T.Group>
-
-<!-- Algorand Dialog -->
-<AlgorandDialog bind:isOpen={showDialog} onClose={closeDialog} />

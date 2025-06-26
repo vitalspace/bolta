@@ -20,6 +20,7 @@ export const gameState = writable<GameState>({
   playerReference: null,
   vehicleExitPosition: null,
   vehicleSensorStates: new Map(), // New: Track which vehicles have player in sensor range
+  showAlgorandDialog: false, // New: Control Algorand dialog visibility
 });
 
 // New store for real-time vehicle data
@@ -43,6 +44,11 @@ export const currentVehicle = derived(gameState, ($gameState) => {
 // New derived store to control player visibility
 export const playerVisible = derived(gameState, ($gameState) => {
   return $gameState.controlMode === "player";
+});
+
+// New derived store for Algorand dialog visibility
+export const showAlgorandDialog = derived(gameState, ($gameState) => {
+  return $gameState.showAlgorandDialog;
 });
 
 export const gameActions = {
@@ -137,6 +143,21 @@ export const gameActions = {
       nitroLevel: nitro,
       isNitroActive: isNitroActive,
       nitroBlocked: nitroBlocked,
+    }));
+  },
+
+  // New action to control Algorand dialog
+  showAlgorandDialog: () => {
+    gameState.update((state) => ({
+      ...state,
+      showAlgorandDialog: true,
+    }));
+  },
+
+  hideAlgorandDialog: () => {
+    gameState.update((state) => ({
+      ...state,
+      showAlgorandDialog: false,
     }));
   },
 
