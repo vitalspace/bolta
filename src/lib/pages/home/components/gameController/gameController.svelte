@@ -14,10 +14,10 @@
   let cameraRef: PerspectiveCamera | undefined = $state<PerspectiveCamera>();
   let playerRef: any = $state();
 
-  // Estados para la interpolación de cámara
+  // States for camera interpolation
   let isTransitioning = $state(false);
   let transitionProgress = $state(0);
-  let transitionDuration = 1.0; // segundos
+  let transitionDuration = 1.0; // seconds
   let fromPosition = new Vector3();
   let toPosition = new Vector3();
   let fromTarget = new Vector3();
@@ -28,12 +28,12 @@
     
     if ($gameState.controlMode === "player" && $gameState.canEnterVehicle) {
       console.log("Entering vehicle...");
-      // Entrar al vehículo - iniciar transición
+      // Enter vehicle - start transition
       gameActions.enterVehicle();
       startCameraTransition("vehicle");
     } else if ($gameState.controlMode === "vehicle") {
       console.log("Exiting vehicle...");
-      // Salir del vehículo - iniciar transición
+      // Exit vehicle - start transition
       gameActions.exitVehicle();
       startCameraTransition("player");
     } else {
@@ -52,20 +52,20 @@
     isTransitioning = true;
     transitionProgress = 0;
     
-    // Guardar posición actual de la cámara
+    // Save current camera position
     fromPosition.copy(cameraRef.position);
     cameraRef.getWorldDirection(fromTarget);
     fromTarget.multiplyScalar(10).add(cameraRef.position);
     
-    // Calcular posición objetivo basada en el modo
+    // Calculate target position based on mode
     if (targetMode === "vehicle" && $gameState.currentVehicle) {
-      // Posición detrás del vehículo
+      // Position behind the vehicle
       const vehiclePos = $gameState.currentVehicle.position;
       toPosition.set(vehiclePos[0], vehiclePos[1] + 3, vehiclePos[2] - 8);
       toTarget.set(vehiclePos[0], vehiclePos[1], vehiclePos[2]);
       console.log("Vehicle transition - from:", fromPosition, "to:", toPosition);
     } else {
-      // Posición detrás del jugador
+      // Position behind the player
       const playerPos = $gameState.playerPosition;
       toPosition.set(playerPos[0], playerPos[1] + 3, playerPos[2] - 5);
       toTarget.set(playerPos[0], playerPos[1], playerPos[2]);
@@ -109,7 +109,7 @@
     });
   };
 
-  // Interpolación de cámara en cada frame
+  // Camera interpolation on each frame
   useTask((delta) => {
     if (isTransitioning && cameraRef) {
       transitionProgress += delta / transitionDuration;
@@ -120,20 +120,20 @@
         console.log("Transition completed");
       }
       
-      // Interpolación suave usando easing
+      // Smooth interpolation using easing
       const t = easeInOutCubic(transitionProgress);
       
-      // Interpolar posición
+      // Interpolate position
       const currentPos = new Vector3().lerpVectors(fromPosition, toPosition, t);
       cameraRef.position.copy(currentPos);
       
-      // Interpolar target
+      // Interpolate target
       const currentTarget = new Vector3().lerpVectors(fromTarget, toTarget, t);
       cameraRef.lookAt(currentTarget);
     }
   });
 
-  // Función de easing para transición suave
+  // Easing function for smooth transition
   const easeInOutCubic = (t: number): number => {
     return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
   };

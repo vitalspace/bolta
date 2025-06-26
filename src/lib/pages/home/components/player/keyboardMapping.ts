@@ -1,9 +1,9 @@
 // KeyboardMapping.ts
-// Define mapeos de teclas para diferentes acciones del juego
+// Define key mappings for different game actions
 
 import { inputManager } from './inputManager';
 
-// Tipo para acciones del juego
+// Type for game actions
 export type GameAction =
   | 'moveForward'
   | 'moveBackward'
@@ -14,21 +14,21 @@ export type GameAction =
   | 'crouch'
   | 'interact';
 
-// Mapa de acciones a teclas
+// Map of actions to keys
 export interface ActionMapping {
   [action: string]: string[];
 }
 
-// Clase que permite mapear acciones a teclas
+// Class that allows mapping actions to keys
 export class KeyboardMapping {
   private mapping: ActionMapping = {};
 
   constructor() {
-    // Configuración por defecto
+    // Default configuration
     this.setDefaultMapping();
   }
 
-  // Establece el mapeo predeterminado
+  // Sets the default mapping
   private setDefaultMapping() {
     this.mapping = {
       moveForward: ['w', 'arrowup'],
@@ -41,12 +41,12 @@ export class KeyboardMapping {
       interact: ['e', 'f'],
     };
 
-    // Inicializa todas las teclas en el input manager
+    // Initialize all keys in the input manager
     const allKeys = this.getAllKeys();
     inputManager.initKeys(allKeys);
   }
 
-  // Obtiene todas las teclas usadas
+  // Gets all used keys
   private getAllKeys(): string[] {
     const keys = new Set<string>();
 
@@ -59,16 +59,16 @@ export class KeyboardMapping {
     return Array.from(keys);
   }
 
-  // Cambia el mapeo para una acción
+  // Changes the mapping for an action
   remapAction(action: GameAction, keys: string[]) {
     this.mapping[action] = keys;
 
-    // Re-inicializar el input manager con las nuevas teclas
+    // Re-initialize the input manager with the new keys
     const allKeys = this.getAllKeys();
     inputManager.initKeys(allKeys);
   }
 
-  // Verifica si una acción está siendo ejecutada
+  // Checks if an action is being executed
   isActionActive(action: GameAction): boolean {
     if (!this.mapping[action]) return false;
 
@@ -81,7 +81,7 @@ export class KeyboardMapping {
     return false;
   }
 
-  // Verifica si una acción acaba de ser activada
+  // Checks if an action was just activated
   isActionJustActivated(action: GameAction): boolean {
     if (!this.mapping[action]) return false;
 
@@ -94,7 +94,7 @@ export class KeyboardMapping {
     return false;
   }
 
-  // Verifica si una acción acaba de ser desactivada
+  // Checks if an action was just deactivated
   isActionJustDeactivated(action: GameAction): boolean {
     if (!this.mapping[action]) return false;
 
@@ -107,11 +107,11 @@ export class KeyboardMapping {
     return false;
   }
 
-  // Devuelve el mapeo actual
+  // Returns the current mapping
   getMapping(): ActionMapping {
     return { ...this.mapping };
   }
 }
 
-// Singleton para usar en toda la aplicación
+// Singleton to use throughout the application
 export const keyboardMapping = new KeyboardMapping();

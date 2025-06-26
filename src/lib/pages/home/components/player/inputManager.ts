@@ -1,23 +1,23 @@
 // InputManager.ts
-// Clase para manejar los inputs del usuario de forma reutilizable
+// Class to handle user inputs in a reusable way
 
-// Interfaz para definir el estado de una tecla
+// Interface to define the state of a key
 export interface KeyState {
     isPressed: boolean;
     justPressed: boolean;
     justReleased: boolean;
   }
   
-  // Interfaz para el mapa de teclas
+  // Interface for the key map
   export interface KeyMap {
     [key: string]: KeyState;
   }
   
-  // Clase para manejar las entradas del teclado
+  // Class to handle keyboard inputs
   export class InputManager {
     keys: KeyMap = {};
     
-    // Método para inicializar las teclas que queremos monitorear
+    // Method to initialize the keys we want to monitor
     initKeys(keyList: string[]) {
       for (const key of keyList) {
         this.keys[key] = {
@@ -28,19 +28,19 @@ export interface KeyState {
       }
     }
   
-    // Método para activar los event listeners
+    // Method to activate event listeners
     activate() {
       document.addEventListener("keydown", this.handleKeyDown.bind(this));
       document.addEventListener("keyup", this.handleKeyUp.bind(this));
     }
   
-    // Método para desactivar los event listeners
+    // Method to deactivate event listeners
     deactivate() {
       document.removeEventListener("keydown", this.handleKeyDown.bind(this));
       document.removeEventListener("keyup", this.handleKeyUp.bind(this));
     }
   
-    // Handler para keydown
+    // Handler for keydown
     private handleKeyDown(e: KeyboardEvent) {
       const key = e.key.toLowerCase();
       if (this.keys[key]) {
@@ -52,7 +52,7 @@ export interface KeyState {
       }
     }
   
-    // Handler para keyup
+    // Handler for keyup
     private handleKeyUp(e: KeyboardEvent) {
       const key = e.key.toLowerCase();
       if (this.keys[key]) {
@@ -62,10 +62,10 @@ export interface KeyState {
       }
     }
   
-    // Método para actualizar el estado de las teclas (llamar en cada frame)
+    // Method to update key states (call on each frame)
     update() {
       for (const key in this.keys) {
-        // Resetear justPressed y justReleased después de un frame
+        // Reset justPressed and justReleased after one frame
         if (this.keys[key].justPressed) {
           this.keys[key].justPressed = false;
         }
@@ -75,26 +75,26 @@ export interface KeyState {
       }
     }
   
-    // Método para verificar si una tecla está presionada
+    // Method to check if a key is pressed
     isKeyPressed(key: string): boolean {
       return this.keys[key]?.isPressed || false;
     }
   
-    // Método para verificar si una tecla fue recién presionada
+    // Method to check if a key was just pressed
     isKeyJustPressed(key: string): boolean {
       return this.keys[key]?.justPressed || false;
     }
   
-    // Método para verificar si una tecla fue recién liberada
+    // Method to check if a key was just released
     isKeyJustReleased(key: string): boolean {
       return this.keys[key]?.justReleased || false;
     }
   
-    // Método para obtener el mapa de teclas directamente
+    // Method to get the key map directly
     getKeyMap(): KeyMap {
       return this.keys;
     }
   }
   
-  // Singleton para usar en toda la aplicación
+  // Singleton to use throughout the application
   export const inputManager = new InputManager();

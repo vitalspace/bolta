@@ -63,14 +63,14 @@ Command: npx @threlte/gltf@3.0.1 .\car.glb -T --draco /draco/
   let controls: ThirdPersonControls | undefined;
   let vehicleRegistered = false;
 
-  // Variables para el velocímetro y nitro
+  // Variables for speedometer and nitro
   let currentSpeed = $state(0);
   let nitroLevel = $state(100);
   let isNitroActive = $state(false);
   let nitroRegenTimer = 0;
-  let nitroBlocked = $state(false); // Nueva variable para bloquear el nitro
+  let nitroBlocked = $state(false); // New variable to block nitro
 
-  // Estado para controlar si este vehículo está activo
+  // State to control if this vehicle is active
   let isActiveVehicle = $derived($isInVehicle && $currentVehicle?.id === carId);
 
   $effect(() => {
@@ -103,7 +103,7 @@ Command: npx @threlte/gltf@3.0.1 .\car.glb -T --draco /draco/
   useTask((delta) => {
     if (!rigidBody || !objectRef || !cameraRef || !controls) return;
 
-    // Registrar el vehículo una vez que todo esté listo
+    // Register the vehicle once everything is ready
     if (!vehicleRegistered && mainGroupRef) {
       console.log("Registering vehicle with ID:", carId);
       gameActions.registerVehicle({
@@ -116,7 +116,7 @@ Command: npx @threlte/gltf@3.0.1 .\car.glb -T --draco /draco/
       vehicleRegistered = true;
     }
 
-    // Solo procesar controles si este vehículo está activo y no hay transición
+    // Only process controls if this vehicle is active and there's no transition
     if (!isActiveVehicle || isTransitioning) return;
 
     const cameraDirection = cameraRef.getWorldDirection(v3);
@@ -140,57 +140,57 @@ Command: npx @threlte/gltf@3.0.1 .\car.glb -T --draco /draco/
     const pos = rigidBody.translation();
     position = [pos.x, pos.y, pos.z];
 
-    // Actualizar posición del vehículo en el estado global
+    // Update vehicle position in global state
     gameActions.updateVehiclePosition(carId, position);
 
     let currentVelocity = 0;
     let reverseVelocity = 0;
 
-    // Calcular velocidad actual para el velocímetro
+    // Calculate current speed for speedometer
     const velocity = rigidBody.linvel();
     const speed = Math.sqrt(velocity.x * velocity.x + velocity.z * velocity.z);
-    currentSpeed = speed * 3.6; // Convertir m/s a km/h
+    currentSpeed = speed * 3.6; // Convert m/s to km/h
 
-    // Sistema de Nitro mejorado con bloqueo
-    // Si el nitro se agota completamente, bloquearlo hasta que se regenere un poco
+    // Improved Nitro system with blocking
+    // If nitro is completely depleted, block it until it regenerates a bit
     if (nitroLevel <= 0 && !nitroBlocked) {
       nitroBlocked = true;
-      console.log("Nitro bloqueado - se agotó completamente");
+      console.log("Nitro blocked - completely depleted");
     }
     
-    // Desbloquear el nitro cuando se haya regenerado al menos un 20%
+    // Unblock nitro when it has regenerated at least 20%
     if (nitroBlocked && nitroLevel >= 20) {
       nitroBlocked = false;
-      console.log("Nitro desbloqueado - se regeneró suficiente");
+      console.log("Nitro unblocked - sufficiently regenerated");
     }
 
-    // Solo permitir nitro si no está bloqueado, hay nitro disponible y se presiona shift
+    // Only allow nitro if not blocked, there's nitro available and shift is pressed
     isNitroActive = $keys.shift.isPressed && nitroLevel > 0 && !nitroBlocked;
     
     if (isNitroActive && ($keys.w.isPressed || $keys.s.isPressed)) {
-      // Consumir nitro
-      nitroLevel = Math.max(0, nitroLevel - delta * 30); // Consume 30% por segundo
-      nitroRegenTimer = 0; // Reset del timer de regeneración
+      // Consume nitro
+      nitroLevel = Math.max(0, nitroLevel - delta * 30); // Consumes 30% per second
+      nitroRegenTimer = 0; // Reset regeneration timer
     } else {
-      // Regenerar nitro después de 2 segundos sin usar
+      // Regenerate nitro after 2 seconds without using
       nitroRegenTimer += delta;
       if (nitroRegenTimer > 2 && nitroLevel < 100) {
-        nitroLevel = Math.min(100, nitroLevel + delta * 20); // Regenera 20% por segundo
+        nitroLevel = Math.min(100, nitroLevel + delta * 20); // Regenerates 20% per second
       }
     }
 
-    // Actualizar datos del vehículo en el store para la UI
-    gameActions.updateVehicleData(currentSpeed, nitroLevel, isNitroActive);
+    // Update vehicle data in store for UI
+    gameActions.updateVehicleData(currentSpeed, nitroLevel, isNitroActive, nitroBlocked);
 
-    // Movimiento con nitro
+    // Movement with nitro
     if ($keys.w.isPressed && isNitroActive && nitroLevel > 0) {
-      currentVelocity = 20; // Velocidad con nitro
+      currentVelocity = 20; // Speed with nitro
     } else if ($keys.w.isPressed && $keys.shift.isPressed) {
-      currentVelocity = 15; // Velocidad normal con shift
+      currentVelocity = 15; // Normal speed with shift
     } else if ($keys.w.isPressed) {
-      currentVelocity = 8; // Velocidad normal
+      currentVelocity = 8; // Normal speed
     } else if ($keys.s.isPressed) {
-      reverseVelocity = -5; // Reversa
+      reverseVelocity = -5; // Reverse
     }
 
     const totalVelocity = currentVelocity + reverseVelocity;
@@ -211,7 +211,7 @@ Command: npx @threlte/gltf@3.0.1 .\car.glb -T --draco /draco/
       );
     }
 
-    // Solo actualizar controles si no hay transición
+    // Only update controls if there's no transition
     if (!isTransitioning) {
       controls.update(0, 0);
     }

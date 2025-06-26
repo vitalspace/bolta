@@ -21,12 +21,12 @@ export const gameState = writable<GameState>({
   vehicleExitPosition: null,
 });
 
-// Nueva store para datos del vehículo en tiempo real
+// New store for real-time vehicle data
 export const vehicleData = writable({
   currentSpeed: 0,
   nitroLevel: 100,
   isNitroActive: false,
-  nitroBlocked: false, // Nueva propiedad para indicar si el nitro está bloqueado
+  nitroBlocked: false, // New property to indicate if nitro is blocked
 });
 
 export const isInVehicle = derived(gameState, ($gameState) => {
@@ -39,7 +39,7 @@ export const currentVehicle = derived(gameState, ($gameState) => {
   return $gameState.currentVehicle;
 });
 
-// Nueva store derivada para controlar visibilidad del jugador
+// New derived store to control player visibility
 export const playerVisible = derived(gameState, ($gameState) => {
   return $gameState.controlMode === "player";
 });
@@ -47,7 +47,7 @@ export const playerVisible = derived(gameState, ($gameState) => {
 export const gameActions = {
   registerVehicle: (vehicle: Vehicle) => {
     gameState.update((state) => {
-      // Evitar duplicados
+      // Avoid duplicates
       const exists = state.nearbyVehicles.find(v => v.id === vehicle.id);
       if (exists) return state;
       
@@ -69,16 +69,16 @@ export const gameActions = {
 
   updatePlayerPosition: (playerPos: [number, number, number]) => {
     gameState.update((state) => {
-      // Solo actualizar posición si el jugador está activo (no en vehículo)
+      // Only update position if player is active (not in vehicle)
       if (state.controlMode !== "player") return state;
 
-      // Calcular vehículos cercanos
+      // Calculate nearby vehicles
       const nearby = state.nearbyVehicles.filter((vehicle) => {
         const distance = Math.sqrt(
           Math.pow(vehicle.position[0] - playerPos[0], 2) +
           Math.pow(vehicle.position[2] - playerPos[2], 2)
         );
-        return distance < 5; // 5 unidades de distancia
+        return distance < 5; // 5 units distance
       });
 
       const canEnter = nearby.length > 0 && state.controlMode === "player";
@@ -103,7 +103,7 @@ export const gameActions = {
           : vehicle
       );
 
-      // Si es el vehículo actual, actualizar también
+      // If it's the current vehicle, also update it
       const updatedCurrentVehicle = state.currentVehicle?.id === vehicleId
         ? { ...state.currentVehicle, position: vehiclePos }
         : state.currentVehicle;
@@ -116,7 +116,7 @@ export const gameActions = {
     });
   },
 
-  // Nueva acción para actualizar datos del vehículo
+  // New action to update vehicle data
   updateVehicleData: (speed: number, nitro: number, isNitroActive: boolean, nitroBlocked: boolean = false) => {
     vehicleData.update(() => ({
       currentSpeed: speed,
@@ -172,12 +172,12 @@ export const gameActions = {
 
       console.log("Exiting vehicle");
       
-      // Calcular posición al lado del vehículo
+      // Calculate position next to the vehicle
       const vehiclePos = state.currentVehicle.position;
       const exitPosition: [number, number, number] = [
-        vehiclePos[0] + 3, // 3 unidades a la derecha del vehículo
-        vehiclePos[1],     // Misma altura
-        vehiclePos[2]      // Misma profundidad
+        vehiclePos[0] + 3, // 3 units to the right of the vehicle
+        vehiclePos[1],     // Same height
+        vehiclePos[2]      // Same depth
       ];
 
       console.log("Player will appear at position:", exitPosition);
@@ -188,23 +188,23 @@ export const gameActions = {
         currentVehicle: null,
         controlMode: "player",
         vehicleExitPosition: exitPosition,
-        playerPosition: exitPosition, // Actualizar posición del jugador
+        playerPosition: exitPosition, // Update player position
       };
     });
   },
 
-  // Nueva acción para aplicar la posición de salida al jugador
+  // New action to apply exit position to player
   applyExitPosition: () => {
     gameState.update((state) => {
       if (state.vehicleExitPosition && state.playerReference) {
         console.log("Applying exit position to player:", state.vehicleExitPosition);
         
-        // Aquí podrías aplicar la posición directamente al rigid body del jugador
-        // si tienes acceso a él desde el store
+        // Here you could apply the position directly to the player's rigid body
+        // if you have access to it from the store
         
         return {
           ...state,
-          vehicleExitPosition: null, // Limpiar después de usar
+          vehicleExitPosition: null, // Clear after using
         };
       }
       return state;

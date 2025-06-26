@@ -2,27 +2,27 @@
   import { isInVehicle, vehicleData, keys } from "../../stores/stores";
   import { Gauge, Zap, LogOut, AlertTriangle } from "@lucide/svelte";
 
-  // Obtener datos del vehículo desde el store
+  // Get vehicle data from store
   let currentSpeed = $derived($vehicleData.currentSpeed);
   let nitroLevel = $derived($vehicleData.nitroLevel);
   let isNitroActive = $derived($vehicleData.isNitroActive);
   let nitroBlocked = $derived($vehicleData.nitroBlocked);
-  let maxSpeed = 120; // Velocidad máxima para el cálculo del porcentaje
+  let maxSpeed = 120; // Maximum speed for percentage calculation
 
-  // Calcular el porcentaje del velocímetro
+  // Calculate speedometer percentage
   let speedPercentage = $derived(Math.min((currentSpeed / maxSpeed) * 100, 100));
   let nitroPercentage = $derived(Math.max(0, Math.min(nitroLevel, 100)));
 
-  // Determinar el color del velocímetro basado en la velocidad
+  // Determine speedometer color based on speed
   let speedColor = $derived(speedPercentage < 30 
     ? 'text-green-400' 
     : speedPercentage < 70 
     ? 'text-yellow-400' 
     : 'text-red-400');
 
-  // Función para salir del vehículo
+  // Function to exit vehicle
   const exitVehicle = () => {
-    // Simular presionar E para salir
+    // Simulate pressing E to exit
     const event = new KeyboardEvent('keydown', { keyCode: 69 });
     document.dispatchEvent(event);
   };
@@ -30,14 +30,14 @@
 
 {#if $isInVehicle}
   <div class="fixed inset-0 pointer-events-none z-50">
-    <!-- Velocímetro - Esquina inferior izquierda -->
+    <!-- Speedometer - Bottom left corner -->
     <div class="absolute bottom-8 left-8 pointer-events-auto">
       <div class="bg-black/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
-        <!-- Velocímetro circular -->
+        <!-- Circular speedometer -->
         <div class="relative w-32 h-32 mb-4">
-          <!-- Círculo de fondo -->
+          <!-- Background circle -->
           <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-            <!-- Fondo del círculo -->
+            <!-- Circle background -->
             <circle
               cx="50"
               cy="50"
@@ -46,7 +46,7 @@
               stroke="rgb(55, 65, 81)"
               stroke-width="8"
             />
-            <!-- Progreso del velocímetro -->
+            <!-- Speedometer progress -->
             <circle
               cx="50"
               cy="50"
@@ -61,18 +61,18 @@
             />
           </svg>
           
-          <!-- Velocidad en el centro -->
+          <!-- Speed in the center -->
           <div class="absolute inset-0 flex flex-col items-center justify-center">
             <span class="text-2xl font-bold text-white">{Math.round(currentSpeed)}</span>
             <span class="text-xs text-gray-400">KM/H</span>
           </div>
         </div>
 
-        <!-- Indicador de velocidad -->
+        <!-- Speed indicator -->
         <div class="text-center">
           <div class="flex items-center justify-center gap-2 mb-2">
             <Gauge class="w-4 h-4 text-gray-400" />
-            <span class="text-sm text-gray-300">Velocidad</span>
+            <span class="text-sm text-gray-300">Speed</span>
           </div>
           <div class="w-full bg-gray-700 rounded-full h-2">
             <div 
@@ -84,10 +84,10 @@
       </div>
     </div>
 
-    <!-- Panel de Nitro - Esquina inferior derecha -->
+    <!-- Nitro Panel - Bottom right corner -->
     <div class="absolute bottom-8 right-8 pointer-events-auto">
       <div class="bg-black/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
-        <!-- Indicador de Nitro -->
+        <!-- Nitro Indicator -->
         <div class="flex items-center gap-3 mb-4">
           <div class="relative">
             {#if nitroBlocked}
@@ -101,7 +101,7 @@
           </div>
           <div>
             <div class="text-white font-semibold">
-              {nitroBlocked ? 'BLOQUEADO' : 'NITRO'}
+              {nitroBlocked ? 'BLOCKED' : 'NITRO'}
             </div>
             <div class="text-sm {nitroBlocked ? 'text-red-400' : 'text-gray-400'}">
               {Math.round(nitroPercentage)}%
@@ -109,7 +109,7 @@
           </div>
         </div>
 
-        <!-- Barra de Nitro -->
+        <!-- Nitro Bar -->
         <div class="w-32 bg-gray-700 rounded-full h-3 mb-4">
           <div 
             class="h-3 rounded-full transition-all duration-300 {
@@ -120,26 +120,26 @@
           ></div>
         </div>
 
-        <!-- Controles de Nitro -->
+        <!-- Nitro Controls -->
         <div class="text-center">
           <div class="text-xs text-gray-400 mb-2">
             {#if nitroBlocked}
-              <span class="text-red-400 font-semibold">NITRO AGOTADO</span>
+              <span class="text-red-400 font-semibold">NITRO DEPLETED</span>
               <br>
-              <span class="text-xs">Espera a que se regenere</span>
+              <span class="text-xs">Wait for regeneration</span>
             {:else if $keys.shift.isPressed && isNitroActive}
-              <span class="text-blue-400 font-semibold">NITRO ACTIVO</span>
+              <span class="text-blue-400 font-semibold">NITRO ACTIVE</span>
             {:else if $keys.shift.isPressed && !isNitroActive}
-              <span class="text-yellow-400 font-semibold">SIN NITRO</span>
+              <span class="text-yellow-400 font-semibold">NO NITRO</span>
             {:else}
-              <span>Mantén SHIFT para nitro</span>
+              <span>Hold SHIFT for nitro</span>
             {/if}
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Botón de Salida - Esquina superior derecha -->
+    <!-- Exit Button - Top right corner -->
     <div class="absolute top-8 right-8 pointer-events-auto">
       <button
         onclick={exitVehicle}
@@ -148,34 +148,34 @@
         <div class="flex items-center gap-3">
           <LogOut class="w-5 h-5 text-white group-hover:animate-pulse" />
           <div class="text-white">
-            <div class="font-semibold">Salir</div>
-            <div class="text-xs opacity-75">Presiona E</div>
+            <div class="font-semibold">Exit</div>
+            <div class="text-xs opacity-75">Press E</div>
           </div>
         </div>
       </button>
     </div>
 
-    <!-- Controles en pantalla - Parte inferior central -->
+    <!-- On-screen Controls - Bottom center -->
     <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 pointer-events-auto">
       <div class="bg-black/60 backdrop-blur-sm rounded-xl px-6 py-3 border border-white/10">
         <div class="flex items-center gap-6 text-sm text-gray-300">
           <div class="flex items-center gap-2">
             <kbd class="px-2 py-1 bg-gray-700 rounded text-xs">W</kbd>
-            <span>Acelerar</span>
+            <span>Accelerate</span>
           </div>
           <div class="flex items-center gap-2">
             <kbd class="px-2 py-1 bg-gray-700 rounded text-xs">S</kbd>
-            <span>Frenar</span>
+            <span>Brake</span>
           </div>
           <div class="flex items-center gap-2">
             <kbd class="px-2 py-1 {nitroBlocked ? 'bg-red-700' : 'bg-gray-700'} rounded text-xs">SHIFT</kbd>
             <span class="{nitroBlocked ? 'text-red-400' : ''}">
-              {nitroBlocked ? 'Nitro Bloqueado' : 'Nitro'}
+              {nitroBlocked ? 'Nitro Blocked' : 'Nitro'}
             </span>
           </div>
           <div class="flex items-center gap-2">
             <kbd class="px-2 py-1 bg-gray-700 rounded text-xs">E</kbd>
-            <span>Salir</span>
+            <span>Exit</span>
           </div>
         </div>
       </div>
