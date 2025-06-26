@@ -272,7 +272,7 @@ class App {
       const txId = txn.txID().toString();
       console.log("txId", txId);
 
-      await algoclient.sendRawTransaction(result).do();
+      await algoclient.sendRawTransaction(result[0]).do();
       await algosdk.waitForConfirmation(algoclient, txId, 3);
 
       const confirmedTxn = await algoclient
@@ -328,7 +328,7 @@ class App {
 
     const txId = optInTxn.txID().toString();
 
-    await algoclient.sendRawTransaction(signedTxn).do();
+    await algoclient.sendRawTransaction(signedTxn[0]).do();
     await algosdk.waitForConfirmation(algoclient, txId, 3);
 
     console.log("Opt-in exitoso. TxID:", txId);
