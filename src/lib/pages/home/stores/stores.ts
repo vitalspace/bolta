@@ -18,7 +18,14 @@ export const gameState = writable<GameState>({
   controlMode: "player",
   canEnterVehicle: false,
   playerReference: null,
-  vehicleExitPosition: null, // Nueva propiedad para almacenar posición de salida
+  vehicleExitPosition: null,
+});
+
+// Nueva store para datos del vehículo en tiempo real
+export const vehicleData = writable({
+  currentSpeed: 0,
+  nitroLevel: 100,
+  isNitroActive: false,
 });
 
 export const isInVehicle = derived(gameState, ($gameState) => {
@@ -106,6 +113,15 @@ export const gameActions = {
         currentVehicle: updatedCurrentVehicle,
       };
     });
+  },
+
+  // Nueva acción para actualizar datos del vehículo
+  updateVehicleData: (speed: number, nitro: number, isNitroActive: boolean) => {
+    vehicleData.update(() => ({
+      currentSpeed: speed,
+      nitroLevel: nitro,
+      isNitroActive: isNitroActive,
+    }));
   },
 
   enterVehicle: () => {

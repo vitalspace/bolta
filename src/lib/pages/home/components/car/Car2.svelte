@@ -165,6 +165,9 @@ Command: npx @threlte/gltf@3.0.1 .\car.glb -T --draco /draco/
       }
     }
 
+    // Actualizar datos del vehículo en el store para la UI
+    gameActions.updateVehicleData(currentSpeed, nitroLevel, isNitroActive);
+
     // Movimiento con nitro
     if ($keys.w.isPressed && isNitroActive && nitroLevel > 0) {
       currentVelocity = 20; // Velocidad con nitro

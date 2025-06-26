@@ -1,20 +1,19 @@
 <script lang="ts">
-  import { isInVehicle, gameState, keys } from "../../stores/stores";
+  import { isInVehicle, vehicleData, keys } from "../../stores/stores";
   import { Gauge, Zap, LogOut } from "@lucide/svelte";
 
-  let {
-    currentSpeed = 0,
-    maxSpeed = 100,
-    nitroLevel = 100,
-    isNitroActive = false
-  } = $props();
+  // Obtener datos del vehículo desde el store
+  let currentSpeed = $derived($vehicleData.currentSpeed);
+  let nitroLevel = $derived($vehicleData.nitroLevel);
+  let isNitroActive = $derived($vehicleData.isNitroActive);
+  let maxSpeed = 120; // Velocidad máxima para el cálculo del porcentaje
 
   // Calcular el porcentaje del velocímetro
-  const speedPercentage = $derived(Math.min((currentSpeed / maxSpeed) * 100, 100));
-  const nitroPercentage = $derived(Math.max(0, Math.min(nitroLevel, 100)));
+  let speedPercentage = $derived(Math.min((currentSpeed / maxSpeed) * 100, 100));
+  let nitroPercentage = $derived(Math.max(0, Math.min(nitroLevel, 100)));
 
   // Determinar el color del velocímetro basado en la velocidad
-  const speedColor = $derived(speedPercentage < 30 
+  let speedColor = $derived(speedPercentage < 30 
     ? 'text-green-400' 
     : speedPercentage < 70 
     ? 'text-yellow-400' 
