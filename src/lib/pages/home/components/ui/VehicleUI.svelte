@@ -10,15 +10,15 @@
   } = $props();
 
   // Calcular el porcentaje del velocímetro
-  $: speedPercentage = Math.min((currentSpeed / maxSpeed) * 100, 100);
-  $: nitroPercentage = Math.max(0, Math.min(nitroLevel, 100));
+  const speedPercentage = $derived(Math.min((currentSpeed / maxSpeed) * 100, 100));
+  const nitroPercentage = $derived(Math.max(0, Math.min(nitroLevel, 100)));
 
   // Determinar el color del velocímetro basado en la velocidad
-  $: speedColor = speedPercentage < 30 
+  const speedColor = $derived(speedPercentage < 30 
     ? 'text-green-400' 
     : speedPercentage < 70 
     ? 'text-yellow-400' 
-    : 'text-red-400';
+    : 'text-red-400');
 
   // Función para salir del vehículo
   const exitVehicle = () => {
