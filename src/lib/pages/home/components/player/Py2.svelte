@@ -190,6 +190,7 @@ Command: npx @threlte/gltf@3.0.1 .\man.glb -T --draco /draco/
         true
       );
 
+      $actions.Jumping?.stop();
       $actions.walk?.stop();
       $actions.Running?.stop();
       $actions.idle?.play();
