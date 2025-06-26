@@ -232,7 +232,7 @@ class App {
       }
 
       // Verificar si la cuenta ya hizo opt-in a la aplicación
-      const appsLocalState = accountInfo['apps-local-state'];
+      const appsLocalState = accountInfo['apps-local-state'] || [];
       const hasOptedIn = Array.isArray(appsLocalState) && appsLocalState.some((app: any) => app.id === appId);
       
       if (!hasOptedIn) {
