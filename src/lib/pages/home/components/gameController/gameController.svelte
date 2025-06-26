@@ -30,7 +30,6 @@
       gameActions.enterVehicle();
       startCameraTransition("vehicle");
     } else if ($gameState.controlMode === "vehicle") {
-      console.log("Exiting vehicle...");
       // Exit vehicle - start transition
       gameActions.exitVehicle();
       startCameraTransition("player");
