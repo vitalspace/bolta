@@ -212,60 +212,60 @@ class App {
   async createNFT() {
     console.log("Creando NFT...");
 
-    const params = await algoclient.getTransactionParams().do();
-    const connectedAccount = this.getConnectedAccount();
+    try {
+      const params = await algoclient.getTransactionParams().do();
+      const connectedAccount = this.getConnectedAccount();
 
-    if (!connectedAccount) {
-      throw new Error("No hay cuenta conectada");
-    }
-
-    const txn = algosdk.makeApplicationCallTxnFromObject({
-      sender: connectedAccount,
-      suggestedParams: params,
-      appIndex: appId,
-      onComplete: algosdk.OnApplicationComplete.NoOpOC,
-      //@ts-ignore
-      appArgs: [new Uint8Array(Buffer.from("nonFungibleAssetCreateAndSend"))],
-    });
-
-    const result = await this.signTransaction.bind(this)([txn], [0]);
-    console.log("NFT creado:", result, txn.rawTxID());
-
-    const txId = txn.txID().toString();
-
-    console.log("txId", txId);
-
-    await algoclient.sendRawTransaction(result).do();
-    await algosdk.waitForConfirmation(algoclient, txId, 3);
-
-    const confirmedTxn = await algoclient
-      .pendingTransactionInformation(txId)
-      .do();
-    const innerTxns = confirmedTxn["inner-txns"] || [];
-    let assetId;
-    for (const itxn of innerTxns) {
-      if (itxn["asset-index"]) {
-        assetId = itxn["asset-index"];
-        break;
+      if (!connectedAccount) {
+        throw new Error("No hay cuenta conectada");
       }
-    }
-    if (!assetId) throw new Error("No se pudo obtener el assetId del NFT");
 
-    // 3. Hacer opt-in al asset
-    const optInTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-      sender: connectedAccount,
-      receiver: connectedAccount,
-      assetIndex: assetId,
-      amount: 0,
-      suggestedParams: params,
-    });
-    const signedOptInTxn = await this.signTransaction.bind(this)(
-      [optInTxn],
-      [0]
-    );
-    // Enviar la transacción de opt-in
-    await algoclient.sendRawTransaction(signedOptInTxn).do();
-    return result;
+      // Verificar si la cuenta ya hizo opt-in a la aplicación
+      try {
+        const accountInfo = await algoclient.accountInformation(connectedAccount).do();
+        const hasOptedIn = accountInfo['apps-local-state']?.some((app: any) => app.id === appId);
+        
+        if (!hasOptedIn) {
+          console.log("Realizando opt-in a la aplicación primero...");
+          await this.optInApp(appId);
+          console.log("Opt-in completado, procediendo con la creación del NFT...");
+        }
+      } catch (optInError) {
+        console.log("Error verificando opt-in, intentando opt-in:", optInError);
+        try {
+          await this.optInApp(appId);
+        } catch (optInRetryError) {
+          console.log("Opt-in falló, continuando con la creación del NFT...");
+        }
+      }
+
+      // Usar el método ABI en lugar de llamada directa
+      console.log("Llamando método nonFungibleAssetCreateAndSend usando ABI...");
+      const result = await this.executeABIMethod("nonFungibleAssetCreateAndSend");
+      
+      console.log("NFT creado exitosamente:", result);
+      return result;
+
+    } catch (error) {
+      console.error("Error detallado al crear NFT:", error);
+      
+      // Si el error es de ApprovalProgram, intentar con opt-in primero
+      if (error.message && error.message.includes("ApprovalProgram")) {
+        console.log("Error de ApprovalProgram detectado, intentando opt-in...");
+        try {
+          await this.optInApp(appId);
+          console.log("Opt-in exitoso, reintentando creación de NFT...");
+          const retryResult = await this.executeABIMethod("nonFungibleAssetCreateAndSend");
+          console.log("NFT creado exitosamente en segundo intento:", retryResult);
+          return retryResult;
+        } catch (retryError) {
+          console.error("Error en segundo intento:", retryError);
+          throw retryError;
+        }
+      }
+      
+      throw error;
+    }
   }
 
   async optInApp(id: number) {
