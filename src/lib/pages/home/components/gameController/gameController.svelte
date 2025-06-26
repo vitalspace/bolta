@@ -48,8 +48,6 @@
       return;
     }
     
-    console.log("Starting camera transition to:", targetMode);
-    
     isTransitioning = true;
     transitionProgress = 0;
     
@@ -64,13 +62,11 @@
       const vehiclePos = $gameState.currentVehicle.position;
       toPosition.set(vehiclePos[0], vehiclePos[1] + 3, vehiclePos[2] - 8);
       toTarget.set(vehiclePos[0], vehiclePos[1], vehiclePos[2]);
-      console.log("Vehicle transition - from:", fromPosition, "to:", toPosition);
     } else {
       // Position behind the player
       const playerPos = $gameState.playerPosition;
       toPosition.set(playerPos[0], playerPos[1] + 3, playerPos[2] - 5);
       toTarget.set(playerPos[0], playerPos[1], playerPos[2]);
-      console.log("Player transition - from:", fromPosition, "to:", toPosition);
     }
   };
 
