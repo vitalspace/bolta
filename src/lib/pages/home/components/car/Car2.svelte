@@ -73,6 +73,32 @@ Command: npx @threlte/gltf@3.0.1 .\car.glb -T --draco /draco/
   // State to control if this vehicle is active
   let isActiveVehicle = $derived($isInVehicle && $currentVehicle?.id === carId);
 
+  // Collision sensor state
+  let playerNearVehicle = $state(false);
+
+  // Collision sensor handlers
+  const handleSensorEnter = (event: any) => {
+    const { targetRigidBody } = event;
+    const userData = targetRigidBody.userData;
+
+    if (userData?.name === "player") {
+      console.log(`Player entered vehicle ${carId} sensor area`);
+      playerNearVehicle = true;
+      gameActions.setPlayerNearVehicle(carId, true);
+    }
+  };
+
+  const handleSensorExit = (event: any) => {
+    const { targetRigidBody } = event;
+    const userData = targetRigidBody.userData;
+
+    if (userData?.name === "player") {
+      console.log(`Player exited vehicle ${carId} sensor area`);
+      playerNearVehicle = false;
+      gameActions.setPlayerNearVehicle(carId, false);
+    }
+  };
+
   $effect(() => {
     if (objectRef && cameraRef && mainGroupRef) {
       const isTouchDevice = "ontouchstart" in window;
@@ -231,6 +257,7 @@ Command: npx @threlte/gltf@3.0.1 .\car.glb -T --draco /draco/
       dispose={false}
     >
       <RigidBody bind:rigidBody enabledRotations={[false, true, false]}>
+        <!-- Main vehicle collider -->
         <Collider shape="cuboid" args={[1, 0.5, 2]}>
           <T.Group position={[0, -0.5, -0.4]} bind:ref={objectRef}>
             <T.Mesh
@@ -322,6 +349,16 @@ Command: npx @threlte/gltf@3.0.1 .\car.glb -T --draco /draco/
             </T.Mesh>
           </T.Group>
         </Collider>
+        
+        <!-- Sensor collider for vehicle entry detection -->
+        <Collider
+          onsensorenter={handleSensorEnter}
+          onsensorexit={handleSensorExit}
+          sensor
+          shape="cuboid"
+          args={[2.5, 1.5, 3.5]}
+          position={[0, 0, 0]}
+        />
       </RigidBody>
     </T.Group>
   {:catch err}

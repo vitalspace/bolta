@@ -167,7 +167,11 @@ Command: npx @threlte/gltf@3.0.1 .\man.glb -T --draco /draco/
       {@render fallback?.()}
     {:then gltf}
       <T.Group name="Scene" {position} bind:ref={mainGroupRef} dispose={false}>
-        <RigidBody bind:rigidBody enabledRotations={[false, true, false]}>
+        <RigidBody 
+          bind:rigidBody 
+          enabledRotations={[false, true, false]}
+          userData={{ name: "player" }}
+        >
           <Collider shape="capsule" args={[0.2, 0.2]}>
             <T.Group
               position={[0, -0.4, 0]}

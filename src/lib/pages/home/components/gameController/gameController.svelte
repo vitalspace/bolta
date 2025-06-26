@@ -23,68 +23,22 @@
   let fromTarget = new Vector3();
   let toTarget = new Vector3();
 
-  // Debounce system for vehicle entry
-  let lastVehicleToggleTime = 0;
-  let vehicleToggleDebounce = 200; // 200ms debounce
-  let lastPlayerPosition: [number, number, number] = [0, 0, 0];
-  let lastVehiclePositions = new Map<string, [number, number, number]>();
-
   const handleVehicleToggle = () => {
-    const currentTime = Date.now();
-    
-    // Debounce to prevent rapid toggling
-    if (currentTime - lastVehicleToggleTime < vehicleToggleDebounce) {
-      console.log("Vehicle toggle debounced");
-      return;
-    }
-    
-    lastVehicleToggleTime = currentTime;
-    
     console.log("Toggle vehicle pressed, current state:", $gameState);
     
-    if ($gameState.controlMode === "player") {
-      // Force recalculate proximity before attempting to enter
-      gameActions.forceRecalculateCanEnter();
-      
-      // Additional check: manually verify if we're near any vehicle
-      const playerPos = $gameState.playerPosition;
-      let nearestVehicle = null;
-      let minDistance = Infinity;
-      
-      for (const vehicle of $gameState.nearbyVehicles) {
-        const distance = Math.sqrt(
-          Math.pow(vehicle.position[0] - playerPos[0], 2) +
-          Math.pow(vehicle.position[2] - playerPos[2], 2)
-        );
-        
-        console.log(`Manual check - Vehicle ${vehicle.id} distance: ${distance.toFixed(2)}`);
-        
-        if (distance < 8 && distance < minDistance) { // Increased range for high-speed entry
-          minDistance = distance;
-          nearestVehicle = vehicle;
-        }
-      }
-      
-      if (nearestVehicle) {
-        console.log(`Found nearby vehicle manually: ${nearestVehicle.id} at distance ${minDistance.toFixed(2)}`);
-        console.log("Forcing vehicle entry...");
-        
-        // Force enter the vehicle even if canEnterVehicle is false
-        gameActions.forceEnterVehicle(nearestVehicle);
-        startCameraTransition("vehicle");
-      } else if ($gameState.canEnterVehicle) {
-        console.log("Entering vehicle via normal flow...");
-        gameActions.enterVehicle();
-        startCameraTransition("vehicle");
-      } else {
-        console.log("Cannot toggle vehicle. Can enter:", $gameState.canEnterVehicle, "Nearby vehicles:", $gameState.nearbyVehicles.length);
-        console.log("Player position:", playerPos);
-        console.log("Vehicle positions:", $gameState.nearbyVehicles.map(v => ({ id: v.id, pos: v.position })));
-      }
+    if ($gameState.controlMode === "player" && $gameState.canEnterVehicle) {
+      console.log("Entering vehicle...");
+      // Enter vehicle - start transition
+      gameActions.enterVehicle();
+      startCameraTransition("vehicle");
     } else if ($gameState.controlMode === "vehicle") {
       console.log("Exiting vehicle...");
+      // Exit vehicle - start transition
       gameActions.exitVehicle();
       startCameraTransition("player");
+    } else {
+      console.log("Cannot toggle vehicle. Can enter:", $gameState.canEnterVehicle);
+      console.log("Vehicles in sensor range:", Array.from($gameState.vehicleSensorStates.keys()));
     }
   };
 
@@ -156,43 +110,8 @@
     });
   };
 
-  // Enhanced proximity tracking
+  // Camera interpolation on each frame
   useTask((delta) => {
-    // Track position changes for better proximity detection
-    const currentPlayerPos = $gameState.playerPosition;
-    const playerMoved = (
-      Math.abs(currentPlayerPos[0] - lastPlayerPosition[0]) > 0.1 ||
-      Math.abs(currentPlayerPos[2] - lastPlayerPosition[2]) > 0.1
-    );
-    
-    if (playerMoved) {
-      lastPlayerPosition = [...currentPlayerPos];
-      
-      // Force proximity recalculation when player moves significantly
-      if ($gameState.controlMode === "player") {
-        gameActions.forceRecalculateCanEnter();
-      }
-    }
-    
-    // Track vehicle position changes
-    for (const vehicle of $gameState.nearbyVehicles) {
-      const lastPos = lastVehiclePositions.get(vehicle.id);
-      const currentPos = vehicle.position;
-      
-      if (!lastPos || 
-          Math.abs(currentPos[0] - lastPos[0]) > 0.5 ||
-          Math.abs(currentPos[2] - lastPos[2]) > 0.5) {
-        
-        lastVehiclePositions.set(vehicle.id, [...currentPos]);
-        
-        // Force proximity recalculation when vehicle moves significantly
-        if ($gameState.controlMode === "player") {
-          gameActions.forceRecalculateCanEnter();
-        }
-      }
-    }
-
-    // Camera interpolation on each frame
     if (isTransitioning && cameraRef) {
       transitionProgress += delta / transitionDuration;
       
@@ -249,16 +168,17 @@
 
 <!-- Debug UI -->
 <div style="position: fixed; top: 10px; right: 10px; color: white; background: rgba(0,0,0,0.7); padding: 15px; border-radius: 5px; font-family: monospace; font-size: 12px;">
-  <div><strong>Debug Info:</strong></div>
+  <div><strong>Debug Info (Sensor-Based):</strong></div>
   <div>Control Mode: {$gameState.controlMode}</div>
   <div>Can Enter Vehicle: {$gameState.canEnterVehicle}</div>
   <div>Player Visible: {$playerVisible}</div>
   <div>Current Vehicle: {$gameState.currentVehicle?.id || 'None'}</div>
-  <div>Nearby Vehicles: {$gameState.nearbyVehicles.length}</div>
+  <div>Vehicles in Sensor Range: {$gameState.vehicleSensorStates.size}</div>
+  <div>Sensor Vehicle IDs: {Array.from($gameState.vehicleSensorStates.keys()).join(', ') || 'None'}</div>
   <div>Player Position: [{$gameState.playerPosition[0].toFixed(1)}, {$gameState.playerPosition[1].toFixed(1)}, {$gameState.playerPosition[2].toFixed(1)}]</div>
   {#if $gameState.currentVehicle}
     <div>Vehicle Position: [{$gameState.currentVehicle.position[0].toFixed(1)}, {$gameState.currentVehicle.position[1].toFixed(1)}, {$gameState.currentVehicle.position[2].toFixed(1)}]</div>
   {/if}
   <div style="margin-top: 10px; color: #ffff00;">Press 'E' near vehicle to enter/exit</div>
-  <div style="margin-top: 5px; color: #ff9900; font-size: 10px;">High-speed entry: Extended range (8 units)</div>
+  <div style="margin-top: 5px; color: #00ff00; font-size: 10px;">✅ Using collision sensors for detection</div>
 </div>

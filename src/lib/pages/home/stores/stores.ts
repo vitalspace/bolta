@@ -19,6 +19,7 @@ export const gameState = writable<GameState>({
   canEnterVehicle: false,
   playerReference: null,
   vehicleExitPosition: null,
+  vehicleSensorStates: new Map(), // New: Track which vehicles have player in sensor range
 });
 
 // New store for real-time vehicle data
@@ -44,38 +45,6 @@ export const playerVisible = derived(gameState, ($gameState) => {
   return $gameState.controlMode === "player";
 });
 
-// Helper function to calculate distance between two positions
-function calculateDistance(pos1: [number, number, number], pos2: [number, number, number]): number {
-  return Math.sqrt(
-    Math.pow(pos1[0] - pos2[0], 2) +
-    Math.pow(pos1[2] - pos2[2], 2)
-  );
-}
-
-// Helper function to check if player can enter any vehicle
-function checkCanEnterVehicle(playerPos: [number, number, number], vehicles: Vehicle[], controlMode: string): boolean {
-  if (controlMode !== "player") return false;
-  
-  const nearby = vehicles.filter((vehicle) => {
-    const distance = calculateDistance(vehicle.position, playerPos);
-    return distance < 5; // 5 units distance
-  });
-  
-  return nearby.length > 0;
-}
-
-// Enhanced helper function for high-speed scenarios
-function checkCanEnterVehicleExtended(playerPos: [number, number, number], vehicles: Vehicle[], controlMode: string): boolean {
-  if (controlMode !== "player") return false;
-  
-  const nearby = vehicles.filter((vehicle) => {
-    const distance = calculateDistance(vehicle.position, playerPos);
-    return distance < 8; // Extended range for high-speed scenarios
-  });
-  
-  return nearby.length > 0;
-}
-
 export const gameActions = {
   registerVehicle: (vehicle: Vehicle) => {
     gameState.update((state) => {
@@ -85,19 +54,10 @@ export const gameActions = {
       
       console.log("Vehicle registered:", vehicle.id);
       
-      const newState = {
+      return {
         ...state,
         nearbyVehicles: [...state.nearbyVehicles, vehicle],
       };
-      
-      // Recalculate canEnterVehicle after adding new vehicle
-      newState.canEnterVehicle = checkCanEnterVehicle(
-        newState.playerPosition, 
-        newState.nearbyVehicles, 
-        newState.controlMode
-      );
-      
-      return newState;
     });
   },
 
@@ -113,32 +73,10 @@ export const gameActions = {
       // Only update position if player is active (not in vehicle)
       if (state.controlMode !== "player") return state;
 
-      const newState = {
+      return {
         ...state,
         playerPosition: playerPos,
       };
-      
-      // Recalculate canEnterVehicle with updated player position
-      newState.canEnterVehicle = checkCanEnterVehicle(
-        playerPos, 
-        state.nearbyVehicles, 
-        state.controlMode
-      );
-      
-      // Debug logging when canEnterVehicle changes
-      if (newState.canEnterVehicle !== state.canEnterVehicle) {
-        console.log("Can enter vehicle changed:", newState.canEnterVehicle);
-        console.log("Player position:", playerPos);
-        console.log("Nearby vehicles:", state.nearbyVehicles.length);
-        
-        // Log distances to all vehicles for debugging
-        state.nearbyVehicles.forEach((vehicle, index) => {
-          const distance = calculateDistance(playerPos, vehicle.position);
-          console.log(`Vehicle ${index} (${vehicle.id}) distance:`, distance.toFixed(2));
-        });
-      }
-
-      return newState;
     });
   },
 
@@ -155,20 +93,40 @@ export const gameActions = {
         ? { ...state.currentVehicle, position: vehiclePos }
         : state.currentVehicle;
 
-      const newState = {
+      return {
         ...state,
         nearbyVehicles: updatedVehicles,
         currentVehicle: updatedCurrentVehicle,
       };
-      
-      // Recalculate canEnterVehicle after vehicle position update
-      newState.canEnterVehicle = checkCanEnterVehicle(
-        state.playerPosition, 
-        updatedVehicles, 
-        state.controlMode
-      );
+    });
+  },
 
-      return newState;
+  // New action to handle sensor-based vehicle proximity
+  setPlayerNearVehicle: (vehicleId: string, isNear: boolean) => {
+    gameState.update((state) => {
+      const newSensorStates = new Map(state.vehicleSensorStates);
+      
+      if (isNear) {
+        newSensorStates.set(vehicleId, true);
+        console.log(`Player is now near vehicle ${vehicleId}`);
+      } else {
+        newSensorStates.delete(vehicleId);
+        console.log(`Player is no longer near vehicle ${vehicleId}`);
+      }
+
+      // Update canEnterVehicle based on sensor states
+      const canEnter = newSensorStates.size > 0 && state.controlMode === "player";
+      
+      if (canEnter !== state.canEnterVehicle) {
+        console.log("Can enter vehicle changed (sensor-based):", canEnter);
+        console.log("Vehicles in sensor range:", Array.from(newSensorStates.keys()));
+      }
+
+      return {
+        ...state,
+        vehicleSensorStates: newSensorStates,
+        canEnterVehicle: canEnter,
+      };
     });
   },
 
@@ -184,32 +142,18 @@ export const gameActions = {
 
   enterVehicle: () => {
     gameState.update((state) => {
-      if (!state.canEnterVehicle) {
-        console.log("Cannot enter vehicle - not near any vehicle");
-        console.log("Current state:", {
-          canEnterVehicle: state.canEnterVehicle,
-          nearbyVehicles: state.nearbyVehicles.length,
-          playerPosition: state.playerPosition,
-          controlMode: state.controlMode
-        });
+      if (!state.canEnterVehicle || state.vehicleSensorStates.size === 0) {
+        console.log("Cannot enter vehicle - no vehicles in sensor range");
+        console.log("Sensor states:", Array.from(state.vehicleSensorStates.keys()));
         return state;
       }
       
-      let nearestVehicle: Vehicle | null = null;
-      let minDistance = Infinity;
-      
-      for (const vehicle of state.nearbyVehicles) {
-        const distance = calculateDistance(vehicle.position, state.playerPosition);
-        console.log(`Checking vehicle ${vehicle.id}, distance: ${distance.toFixed(2)}`);
-        
-        if (distance < minDistance && distance < 5) { // Ensure it's within range
-          minDistance = distance;
-          nearestVehicle = vehicle;
-        }
-      }
+      // Get the first vehicle in sensor range
+      const vehicleId = Array.from(state.vehicleSensorStates.keys())[0];
+      const nearestVehicle = state.nearbyVehicles.find(v => v.id === vehicleId);
 
       if (nearestVehicle) {
-        console.log("Entering vehicle:", nearestVehicle.id, "at distance:", minDistance.toFixed(2));
+        console.log("Entering vehicle:", nearestVehicle.id, "(sensor-detected)");
         console.log("Player will be hidden");
         
         return {
@@ -220,23 +164,8 @@ export const gameActions = {
         };
       }
       
-      console.log("No nearest vehicle found within range");
+      console.log("Vehicle found in sensor but not in nearby vehicles list");
       return state;
-    });
-  },
-
-  // New action for forced vehicle entry (for high-speed scenarios)
-  forceEnterVehicle: (vehicle: Vehicle) => {
-    gameState.update((state) => {
-      console.log("Force entering vehicle:", vehicle.id);
-      console.log("Player will be hidden");
-      
-      return {
-        ...state,
-        currentVehicle: vehicle,
-        controlMode: "vehicle",
-        canEnterVehicle: false,
-      };
     });
   },
 
@@ -260,22 +189,14 @@ export const gameActions = {
       console.log("Player will appear at position:", exitPosition);
       console.log("Vehicle position was:", vehiclePos);
 
-      const newState = {
+      return {
         ...state,
         currentVehicle: null,
         controlMode: "player",
         vehicleExitPosition: exitPosition,
         playerPosition: exitPosition, // Update player position
+        // Note: canEnterVehicle will be updated by sensor system if still in range
       };
-      
-      // Recalculate canEnterVehicle after exiting
-      newState.canEnterVehicle = checkCanEnterVehicle(
-        exitPosition, 
-        state.nearbyVehicles, 
-        "player"
-      );
-
-      return newState;
     });
   },
 
@@ -285,47 +206,12 @@ export const gameActions = {
       if (state.vehicleExitPosition && state.playerReference) {
         console.log("Applying exit position to player:", state.vehicleExitPosition);
         
-        // Here you could apply the position directly to the player's rigid body
-        // if you have access to it from the store
-        
         return {
           ...state,
           vehicleExitPosition: null, // Clear after using
         };
       }
       return state;
-    });
-  },
-
-  // Enhanced action to force recalculation of canEnterVehicle (for debugging and high-speed scenarios)
-  forceRecalculateCanEnter: () => {
-    gameState.update((state) => {
-      const normalRange = checkCanEnterVehicle(
-        state.playerPosition, 
-        state.nearbyVehicles, 
-        state.controlMode
-      );
-      
-      const extendedRange = checkCanEnterVehicleExtended(
-        state.playerPosition, 
-        state.nearbyVehicles, 
-        state.controlMode
-      );
-      
-      console.log("Force recalculate - Normal range:", normalRange, "Extended range:", extendedRange);
-      console.log("Player position:", state.playerPosition);
-      console.log("Vehicles:", state.nearbyVehicles.length);
-      
-      // Log all vehicle distances
-      state.nearbyVehicles.forEach((vehicle, index) => {
-        const distance = calculateDistance(state.playerPosition, vehicle.position);
-        console.log(`Force check - Vehicle ${index} (${vehicle.id}) distance:`, distance.toFixed(2));
-      });
-      
-      return {
-        ...state,
-        canEnterVehicle: normalRange
-      };
     });
   },
 };

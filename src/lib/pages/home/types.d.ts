@@ -15,5 +15,6 @@ export interface GameState {
   controlMode: "player" | "vehicle";
   canEnterVehicle: boolean;
   playerReference: Group | null;
-  vehicleExitPosition: [number, number, number] | null; // Nueva propiedad
+  vehicleExitPosition: [number, number, number] | null;
+  vehicleSensorStates: Map<string, boolean>; // New: Track sensor states for each vehicle
 }
