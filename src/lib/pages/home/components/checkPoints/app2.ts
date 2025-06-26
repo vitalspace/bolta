@@ -342,7 +342,7 @@ class App {
       sender: connectedAccount,
       suggestedParams: params,
       appIndex: id, // Use the id parameter instead of global appId
-      note: undefined, // Changed from new Uint8Array(0) to undefined
+      note: new Uint8Array(0), // Changed from undefined to new Uint8Array(0)
     });
 
     // Crear SignerTransaction según la documentación
