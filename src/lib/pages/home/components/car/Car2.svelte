@@ -92,18 +92,6 @@ Command: npx @threlte/gltf@3.0.1 .\car.glb -T --draco /draco/
     }
   });
 
-  $effect(() => {
-    if (mainGroupRef) {
-      console.log("Registering vehicle with ID:", carId);
-      gameActions.registerVehicle({
-        id: carId,
-        reference: mainGroupRef!,
-        position: position,
-        rotation: rotation,
-        type: "car",
-      });
-    }
-  });
 
   useTask(() => {
     if (!rigidBody || !objectRef || !cameraRef || !controls) return;
