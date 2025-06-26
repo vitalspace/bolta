@@ -4,17 +4,17 @@
   import { FakeGlowMaterial, HTML, useDraco, useGltf } from "@threlte/extras";
   import { keys } from "../../stores/stores";
 
-  console.log($keys)
 
   let isEnter = $state();
 
-  const  handleEnter = () => {
-      isEnter = true
-  }
+  const handleEnter = () => isEnter = true;
+  const handleExit = () => isEnter = false;
 
   useTask(() => {
 
-  
+    if($keys.e.isPressed && isEnter) {
+      console.log("hello")
+    }
     
   })
   
@@ -25,8 +25,8 @@
       <AutoColliders
         shape="cuboid"
         sensor={true}
-        onsensorenter={() => {}}
-        onsensorexit={() => {}}
+        onsensorenter={() => handleEnter}
+        onsensorexit={() => handleExit}
       >
         <T.Mesh >
           <T.CylinderGeometry args={[0.4, 0.4, 0.5]} />
