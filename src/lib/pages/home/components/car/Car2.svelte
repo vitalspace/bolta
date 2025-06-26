@@ -33,6 +33,7 @@ Command: npx @threlte/gltf@3.0.1 .\car.glb -T --draco /draco/
     position,
     rotation,
     color,
+    isTransitioning = false,
     fallback = () => {},
     error = () => {},
     children = () => {},
@@ -59,8 +60,10 @@ Command: npx @threlte/gltf@3.0.1 .\car.glb -T --draco /draco/
   let mainGroupRef: Group | undefined = $state<Group>();
   let rigidBody: RapierRigidBody | undefined = $state<RapierRigidBody>();
   let objectRef: Group | undefined = $state<Group>();
-  //   let cameraRef: PerspectiveCamera | undefined = $state<PerspectiveCamera>();
   let controls: ThirdPersonControls | undefined;
+
+  // Estado para controlar si este vehículo está activo
+  let isActiveVehicle = $derived($isInVehicle && $currentVehicle?.id === carId);
 
   $effect(() => {
     if (objectRef && cameraRef && mainGroupRef) {
@@ -81,7 +84,7 @@ Command: npx @threlte/gltf@3.0.1 .\car.glb -T --draco /draco/
         });
 
         canvas.addEventListener("pointermove", (e) => {
-          if (document.pointerLockElement === canvas) {
+          if (document.pointerLockElement === canvas && isActiveVehicle && !isTransitioning) {
             controls?.update(e.movementX * 2, e.movementY * 2);
           }
         });
@@ -89,24 +92,23 @@ Command: npx @threlte/gltf@3.0.1 .\car.glb -T --draco /draco/
     }
   });
 
-  // $effect(() => {
-  // if (mainGroupRef) {
-  // gameActions.registerVehicle({
-  //   id: carId,
-  //   reference: mainGroupRef!,
-  //   position: position,
-  //   rotation: rotation,
-  //   type: "car",
-  // });
-  // }
-  // });
-
-  // console.log($gameState);
+  $effect(() => {
+    if (mainGroupRef) {
+      gameActions.registerVehicle({
+        id: carId,
+        reference: mainGroupRef!,
+        position: position,
+        rotation: rotation,
+        type: "car",
+      });
+    }
+  });
 
   useTask(() => {
     if (!rigidBody || !objectRef || !cameraRef || !controls) return;
 
-    // if (!$isInVehicle || $currentVehicle?.id !== carId) return;
+    // Solo procesar controles si este vehículo está activo y no hay transición
+    if (!isActiveVehicle || isTransitioning) return;
 
     const cameraDirection = cameraRef.getWorldDirection(v3);
     const thetaCamera = Math.atan2(cameraDirection.x, cameraDirection.z);
@@ -129,6 +131,9 @@ Command: npx @threlte/gltf@3.0.1 .\car.glb -T --draco /draco/
     const pos = rigidBody.translation();
     position = [pos.x, pos.y, pos.z];
 
+    // Actualizar posición del vehículo en el estado global
+    gameActions.updateVehiclePosition(carId, position);
+
     let currentVelocity = 0;
     let reverseVelocity = 0;
 
@@ -147,22 +152,7 @@ Command: npx @threlte/gltf@3.0.1 .\car.glb -T --draco /draco/
       const x = Math.sin(thetaCamera) * velocity;
       const z = Math.cos(thetaCamera) * velocity;
       rigidBody.setLinvel({ x, y: 0, z }, true);
-
-      // Transición de animaciones
-      //   $actions.idle?.reset();
-      if (currentVelocity === 6) {
-        // $actions.walk?.reset();
-        // $actions.Running?.play();
-      } else {
-        // $actions.Running?.reset();
-        // $actions.walk?.play();
-      }
     } else {
-      // Cuando no se presiona W
-      //   rigidBody.setLinvel({ x: 0, y: 0, z: 0 }, true);
-      //   $actions.walk?.stop();
-      //   $actions.Running?.stop();
-      //   $actions.idle?.play();
       const currentVel = rigidBody.linvel();
       rigidBody.setLinvel(
         {
@@ -174,21 +164,12 @@ Command: npx @threlte/gltf@3.0.1 .\car.glb -T --draco /draco/
       );
     }
 
-    // Lógica para recoger el cubo
-    if ($keys.e.isPressed) {
+    // Solo actualizar controles si no hay transición
+    if (!isTransitioning) {
+      controls.update(0, 0);
     }
-
-    // Lógica para soltar el cubo
-    if (!$keys.e.isPressed) {
-    }
-
-    controls.update(0, 0);
-    // $actions['Runningning']?.play()
   });
-
 </script>
-
-<!-- <T.PerspectiveCamera makeDefault bind:ref={cameraRef} /> -->
 
 <T.Group bind:ref dispose={false} {...props}>
   {#await gltf}

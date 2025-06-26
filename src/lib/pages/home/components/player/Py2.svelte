@@ -32,7 +32,6 @@ Command: npx @threlte/gltf@3.0.1 .\man.glb -T --draco /draco/
   let mainGroupRef: Group | undefined = $state<Group>();
   let rigidBody: RapierRigidBody | undefined = $state<RapierRigidBody>();
   let objectRef: Group | undefined = $state<Group>();
-  //   let cameraRef: PerspectiveCamera | undefined = $state<PerspectiveCamera>();
   let controls: ThirdPersonControls | undefined;
   let position: [number, number, number] = $state([0, 5, 0]);
 
@@ -62,7 +61,7 @@ Command: npx @threlte/gltf@3.0.1 .\man.glb -T --draco /draco/
         });
 
         canvas.addEventListener("pointermove", (e) => {
-          if (document.pointerLockElement === canvas) {
+          if (document.pointerLockElement === canvas && isActive) {
             controls?.update(e.movementX * 2, e.movementY * 2);
           }
         });
@@ -73,6 +72,7 @@ Command: npx @threlte/gltf@3.0.1 .\man.glb -T --draco /draco/
   useTask(() => {
     if (!rigidBody || !objectRef || !cameraRef || !controls) return;
 
+    // Solo procesar si el jugador está activo (no en vehículo)
     if (!isActive) return;
 
     const cameraDirection = cameraRef.getWorldDirection(v3);
@@ -121,27 +121,14 @@ Command: npx @threlte/gltf@3.0.1 .\man.glb -T --draco /draco/
         $actions.walk?.play();
       }
     } else {
-      // Cuando no se presiona W
-      //   rigidBody.setLinvel({ x: 0, y: 0, z: 0 }, true);
       $actions.walk?.stop();
       $actions.Running?.stop();
       $actions.idle?.play();
     }
 
-    // Lógica para recoger el cubo
-    if ($keys.e.isPressed) {
-    }
-
-    // Lógica para soltar el cubo
-    if (!$keys.e.isPressed) {
-    }
-
     controls.update(0, 0);
-    // $actions['Runningning']?.play()
   });
 </script>
-
-<!-- <T.PerspectiveCamera makeDefault bind:ref={cameraRef} /> -->
 
 <T is={ref} dispose={false} {...props}>
   {#await gltf}

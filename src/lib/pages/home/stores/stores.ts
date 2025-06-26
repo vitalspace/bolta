@@ -47,7 +47,7 @@ export const gameActions = {
   registerPlayer: (playerRef: any) => {
     gameState.update((state) => ({
       ...state,
-      playerRef,
+      playerReference: playerRef,
     }));
   },
 
@@ -66,6 +66,27 @@ export const gameActions = {
         ...state,
         playerPosition: playerPos,
         canEnterVehicle: nearby.length > 0 && state.controlMode === "player",
+      };
+    });
+  },
+
+  updateVehiclePosition: (vehicleId: string, vehiclePos: [number, number, number]) => {
+    gameState.update((state) => {
+      const updatedVehicles = state.nearbyVehicles.map(vehicle => 
+        vehicle.id === vehicleId 
+          ? { ...vehicle, position: vehiclePos }
+          : vehicle
+      );
+
+      // Si es el vehículo actual, actualizar también
+      const updatedCurrentVehicle = state.currentVehicle?.id === vehicleId
+        ? { ...state.currentVehicle, position: vehiclePos }
+        : state.currentVehicle;
+
+      return {
+        ...state,
+        nearbyVehicles: updatedVehicles,
+        currentVehicle: updatedCurrentVehicle,
       };
     });
   },
