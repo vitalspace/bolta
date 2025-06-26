@@ -33,6 +33,8 @@
     const currentEPressed = $keys.e.isPressed;
     
     if (currentEPressed && !lastEPressed && isPlayerNear) {
+    
+        console.log("me cumplo")
       openDialog();
     }
     
