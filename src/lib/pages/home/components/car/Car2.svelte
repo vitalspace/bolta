@@ -68,6 +68,7 @@ Command: npx @threlte/gltf@3.0.1 .\car.glb -T --draco /draco/
   let nitroLevel = $state(100);
   let isNitroActive = $state(false);
   let nitroRegenTimer = 0;
+  let nitroBlocked = $state(false); // Nueva variable para bloquear el nitro
 
   // Estado para controlar si este vehículo está activo
   let isActiveVehicle = $derived($isInVehicle && $currentVehicle?.id === carId);
@@ -150,8 +151,21 @@ Command: npx @threlte/gltf@3.0.1 .\car.glb -T --draco /draco/
     const speed = Math.sqrt(velocity.x * velocity.x + velocity.z * velocity.z);
     currentSpeed = speed * 3.6; // Convertir m/s a km/h
 
-    // Sistema de Nitro
-    isNitroActive = $keys.shift.isPressed && nitroLevel > 0;
+    // Sistema de Nitro mejorado con bloqueo
+    // Si el nitro se agota completamente, bloquearlo hasta que se regenere un poco
+    if (nitroLevel <= 0 && !nitroBlocked) {
+      nitroBlocked = true;
+      console.log("Nitro bloqueado - se agotó completamente");
+    }
+    
+    // Desbloquear el nitro cuando se haya regenerado al menos un 20%
+    if (nitroBlocked && nitroLevel >= 20) {
+      nitroBlocked = false;
+      console.log("Nitro desbloqueado - se regeneró suficiente");
+    }
+
+    // Solo permitir nitro si no está bloqueado, hay nitro disponible y se presiona shift
+    isNitroActive = $keys.shift.isPressed && nitroLevel > 0 && !nitroBlocked;
     
     if (isNitroActive && ($keys.w.isPressed || $keys.s.isPressed)) {
       // Consumir nitro
@@ -225,9 +239,9 @@ Command: npx @threlte/gltf@3.0.1 .\car.glb -T --draco /draco/
               rotation={[0, Math.PI, 0]}
             >
               <T.MeshBasicMaterial
-                color={isNitroActive ? "blue" : "red"}
+                color={isNitroActive ? "blue" : nitroBlocked ? "gray" : "red"}
                 transparent={true}
-                opacity={isNitroActive ? 0.8 : 0.5}
+                opacity={isNitroActive ? 0.8 : nitroBlocked ? 0.3 : 0.5}
                 blending={CustomBlending}
                 blendDst={OneFactor}
                 blendEquation={AddEquation}
@@ -280,7 +294,7 @@ Command: npx @threlte/gltf@3.0.1 .\car.glb -T --draco /draco/
               position={[0, 0.84, 0]}
               rotation={[Math.PI / 2, 0, 0]}
             >
-              <MeshLineMaterial color={isNitroActive ? "#00ffff" : "#6355df"} linewidth={0.1} />
+              <MeshLineMaterial color={isNitroActive ? "#00ffff" : nitroBlocked ? "#666666" : "#6355df"} linewidth={0.1} />
             </T.Mesh>
             <T.Mesh
               geometry={gltf.nodes.stop_light_2.geometry}

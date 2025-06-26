@@ -26,6 +26,7 @@ export const vehicleData = writable({
   currentSpeed: 0,
   nitroLevel: 100,
   isNitroActive: false,
+  nitroBlocked: false, // Nueva propiedad para indicar si el nitro está bloqueado
 });
 
 export const isInVehicle = derived(gameState, ($gameState) => {
@@ -116,11 +117,12 @@ export const gameActions = {
   },
 
   // Nueva acción para actualizar datos del vehículo
-  updateVehicleData: (speed: number, nitro: number, isNitroActive: boolean) => {
+  updateVehicleData: (speed: number, nitro: number, isNitroActive: boolean, nitroBlocked: boolean = false) => {
     vehicleData.update(() => ({
       currentSpeed: speed,
       nitroLevel: nitro,
       isNitroActive: isNitroActive,
+      nitroBlocked: nitroBlocked,
     }));
   },
 

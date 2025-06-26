@@ -1,11 +1,12 @@
 <script lang="ts">
   import { isInVehicle, vehicleData, keys } from "../../stores/stores";
-  import { Gauge, Zap, LogOut } from "@lucide/svelte";
+  import { Gauge, Zap, LogOut, AlertTriangle } from "@lucide/svelte";
 
   // Obtener datos del vehículo desde el store
   let currentSpeed = $derived($vehicleData.currentSpeed);
   let nitroLevel = $derived($vehicleData.nitroLevel);
   let isNitroActive = $derived($vehicleData.isNitroActive);
+  let nitroBlocked = $derived($vehicleData.nitroBlocked);
   let maxSpeed = 120; // Velocidad máxima para el cálculo del porcentaje
 
   // Calcular el porcentaje del velocímetro
@@ -89,21 +90,32 @@
         <!-- Indicador de Nitro -->
         <div class="flex items-center gap-3 mb-4">
           <div class="relative">
-            <Zap class="w-8 h-8 {isNitroActive ? 'text-blue-400 animate-pulse' : 'text-gray-400'}" />
-            {#if isNitroActive}
-              <div class="absolute inset-0 bg-blue-400/20 rounded-full animate-ping"></div>
+            {#if nitroBlocked}
+              <AlertTriangle class="w-8 h-8 text-red-400 animate-pulse" />
+            {:else}
+              <Zap class="w-8 h-8 {isNitroActive ? 'text-blue-400 animate-pulse' : 'text-gray-400'}" />
+              {#if isNitroActive}
+                <div class="absolute inset-0 bg-blue-400/20 rounded-full animate-ping"></div>
+              {/if}
             {/if}
           </div>
           <div>
-            <div class="text-white font-semibold">NITRO</div>
-            <div class="text-sm text-gray-400">{Math.round(nitroPercentage)}%</div>
+            <div class="text-white font-semibold">
+              {nitroBlocked ? 'BLOQUEADO' : 'NITRO'}
+            </div>
+            <div class="text-sm {nitroBlocked ? 'text-red-400' : 'text-gray-400'}">
+              {Math.round(nitroPercentage)}%
+            </div>
           </div>
         </div>
 
         <!-- Barra de Nitro -->
         <div class="w-32 bg-gray-700 rounded-full h-3 mb-4">
           <div 
-            class="h-3 rounded-full transition-all duration-300 {nitroPercentage > 20 ? 'bg-blue-400' : 'bg-red-400'}"
+            class="h-3 rounded-full transition-all duration-300 {
+              nitroBlocked ? 'bg-red-400' : 
+              nitroPercentage > 20 ? 'bg-blue-400' : 'bg-red-400'
+            }"
             style="width: {nitroPercentage}%"
           ></div>
         </div>
@@ -111,8 +123,14 @@
         <!-- Controles de Nitro -->
         <div class="text-center">
           <div class="text-xs text-gray-400 mb-2">
-            {#if $keys.shift.isPressed}
+            {#if nitroBlocked}
+              <span class="text-red-400 font-semibold">NITRO AGOTADO</span>
+              <br>
+              <span class="text-xs">Espera a que se regenere</span>
+            {:else if $keys.shift.isPressed && isNitroActive}
               <span class="text-blue-400 font-semibold">NITRO ACTIVO</span>
+            {:else if $keys.shift.isPressed && !isNitroActive}
+              <span class="text-yellow-400 font-semibold">SIN NITRO</span>
             {:else}
               <span>Mantén SHIFT para nitro</span>
             {/if}
@@ -150,8 +168,10 @@
             <span>Frenar</span>
           </div>
           <div class="flex items-center gap-2">
-            <kbd class="px-2 py-1 bg-gray-700 rounded text-xs">SHIFT</kbd>
-            <span>Nitro</span>
+            <kbd class="px-2 py-1 {nitroBlocked ? 'bg-red-700' : 'bg-gray-700'} rounded text-xs">SHIFT</kbd>
+            <span class="{nitroBlocked ? 'text-red-400' : ''}">
+              {nitroBlocked ? 'Nitro Bloqueado' : 'Nitro'}
+            </span>
           </div>
           <div class="flex items-center gap-2">
             <kbd class="px-2 py-1 bg-gray-700 rounded text-xs">E</kbd>
@@ -162,3 +182,4 @@
     </div>
   </div>
 {/if}
+</script>
