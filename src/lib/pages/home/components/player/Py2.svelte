@@ -172,7 +172,7 @@ Command: npx @threlte/gltf@3.0.1 .\man.glb -T --draco /draco/
             <T.Group
               position={[0, -0.4, 0]}
               name="Armature"
-              rotation={[Math.PI / 2, 0, Math.PI / 2]}
+              rotation={[Math.PI / 2, 0, 0]}
               scale={0.015}
             >
               <T is={gltf.nodes.mixamorigHips} />
