@@ -57,7 +57,7 @@
 
   <!-- Floating Icon -->
   <T.Group position={[0, 1.5, 0]} rotation={[0, 0, 0]}>
-    <HTML transform>
+    <HTML transform occlude={true}>
       <div class="flex flex-col items-center pointer-events-none">
         <!-- Algorand Icon -->
         <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-2 animate-bounce">
