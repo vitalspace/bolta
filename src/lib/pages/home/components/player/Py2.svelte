@@ -36,6 +36,13 @@ Command: npx @threlte/gltf@3.0.1 .\man.glb -T --draco /draco/
   let controls: ThirdPersonControls | undefined;
   let position: [number, number, number] = $state([0, 5, 0]);
 
+  // Jump variables
+  let isGrounded = $state(true);
+  let jumpCooldown = $state(0);
+  const JUMP_FORCE = 8;
+  const JUMP_COOLDOWN_TIME = 0.3; // seconds
+  const GROUND_CHECK_THRESHOLD = 0.1; // How close to ground to be considered grounded
+
   // @ts-ignore
   delete actions["T Pose"];
   // @ts-ignore
@@ -70,8 +77,20 @@ Command: npx @threlte/gltf@3.0.1 .\man.glb -T --draco /draco/
     }
   });
 
-  useTask(() => {
+  useTask((delta) => {
     if (!rigidBody || !objectRef || !cameraRef || !controls) return;
+
+    // Update jump cooldown
+    if (jumpCooldown > 0) {
+      jumpCooldown -= delta;
+    }
+
+    // Check if player is grounded
+    const velocity = rigidBody.linvel();
+    const pos = rigidBody.translation();
+    
+    // Simple ground check - if vertical velocity is very small and we're not too high
+    isGrounded = Math.abs(velocity.y) < GROUND_CHECK_THRESHOLD && pos.y < 6; // Adjust based on your ground level
 
     // Handle vehicle exit position within the physics loop
     if ($gameState.vehicleExitPosition && isVisible) {
@@ -112,11 +131,25 @@ Command: npx @threlte/gltf@3.0.1 .\man.glb -T --draco /draco/
 
     rigidBody.setAngvel({ x: 0, y: clampedAngularVelocity, z: 0 }, true);
 
-    const pos = rigidBody.translation();
     position = [pos.x, pos.y, pos.z];
     gameActions.updatePlayerPosition(position);
 
     let currentVelocity = 0;
+
+    // Handle jump
+    if ($keys.space.isPressed && isGrounded && jumpCooldown <= 0) {
+      console.log("Player jumping!");
+      
+      // Apply upward impulse
+      rigidBody.applyImpulse({ x: 0, y: JUMP_FORCE, z: 0 }, true);
+      
+      // Set cooldown to prevent multiple jumps
+      jumpCooldown = JUMP_COOLDOWN_TIME;
+      isGrounded = false;
+      
+      // You could add a jump animation here if you have one
+      // $actions.jump?.play();
+    }
 
     // Movement
     if ($keys.w.isPressed && $keys.shift.isPressed) {
@@ -128,7 +161,10 @@ Command: npx @threlte/gltf@3.0.1 .\man.glb -T --draco /draco/
     if (currentVelocity > 0) {
       const x = Math.sin(thetaCamera) * currentVelocity;
       const z = Math.cos(thetaCamera) * currentVelocity;
-      rigidBody.setLinvel({ x, y: 0, z }, true);
+      
+      // Preserve Y velocity for jumping/falling
+      const currentYVelocity = rigidBody.linvel().y;
+      rigidBody.setLinvel({ x, y: currentYVelocity, z }, true);
 
       // Animation transitions
       $actions.idle?.reset();
@@ -140,12 +176,12 @@ Command: npx @threlte/gltf@3.0.1 .\man.glb -T --draco /draco/
         $actions.walk?.play();
       }
     } else {
-      // When not moving, gradually stop
+      // When not moving, gradually stop horizontal movement but preserve Y velocity
       const currentVel = rigidBody.linvel();
       rigidBody.setLinvel(
         {
           x: currentVel.x * 0.9,
-          y: currentVel.y,
+          y: currentVel.y, // Don't dampen Y velocity (for jumping/falling)
           z: currentVel.z * 0.9,
         },
         true

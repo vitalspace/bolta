@@ -181,4 +181,5 @@
   {/if}
   <div style="margin-top: 10px; color: #ffff00;">Press 'E' near vehicle to enter/exit</div>
   <div style="margin-top: 5px; color: #00ff00; font-size: 10px;">✅ Using collision sensors for detection</div>
+  <div style="margin-top: 5px; color: #00ffff; font-size: 10px;">🚀 Press 'SPACE' to jump</div>
 </div>
