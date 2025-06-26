@@ -145,9 +145,6 @@
   });
 
   // Debug: mostrar estado actual
-  $effect(() => {
-    console.log("Game state changed:", $gameState);
-  });
 </script>
 
 <T.PerspectiveCamera makeDefault bind:ref={cameraRef} />
