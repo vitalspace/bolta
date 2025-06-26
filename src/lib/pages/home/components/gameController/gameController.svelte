@@ -9,6 +9,7 @@
   } from "../../stores/stores";
   import Car from "../car/Car2.svelte";
   import Player from "../player/Py2.svelte";
+  import VehicleUI from "../ui/VehicleUI.svelte";
 
   let cameraRef: PerspectiveCamera | undefined = $state<PerspectiveCamera>();
   let playerRef: any = $state();
@@ -160,6 +161,9 @@
   {cameraRef}
   {isTransitioning}
 />
+
+<!-- Vehicle UI Component -->
+<VehicleUI />
 
 <!-- Debug UI -->
 <div style="position: fixed; top: 10px; right: 10px; color: white; background: rgba(0,0,0,0.7); padding: 15px; border-radius: 5px; font-family: monospace; font-size: 12px;">

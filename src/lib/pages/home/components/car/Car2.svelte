@@ -63,6 +63,12 @@ Command: npx @threlte/gltf@3.0.1 .\car.glb -T --draco /draco/
   let controls: ThirdPersonControls | undefined;
   let vehicleRegistered = false;
 
+  // Variables para el velocímetro y nitro
+  let currentSpeed = $state(0);
+  let nitroLevel = $state(100);
+  let isNitroActive = $state(false);
+  let nitroRegenTimer = 0;
+
   // Estado para controlar si este vehículo está activo
   let isActiveVehicle = $derived($isInVehicle && $currentVehicle?.id === carId);
 
@@ -93,7 +99,7 @@ Command: npx @threlte/gltf@3.0.1 .\car.glb -T --draco /draco/
     }
   });
 
-  useTask(() => {
+  useTask((delta) => {
     if (!rigidBody || !objectRef || !cameraRef || !controls) return;
 
     // Registrar el vehículo una vez que todo esté listo
@@ -139,20 +145,42 @@ Command: npx @threlte/gltf@3.0.1 .\car.glb -T --draco /draco/
     let currentVelocity = 0;
     let reverseVelocity = 0;
 
-    // Movimiento
-    if ($keys.w.isPressed && $keys.shift.isPressed) {
-      currentVelocity = 15;
-    } else if ($keys.w.isPressed) {
-      currentVelocity = 8;
-    } else if ($keys.s.isPressed) {
-      reverseVelocity = -5;
+    // Calcular velocidad actual para el velocímetro
+    const velocity = rigidBody.linvel();
+    const speed = Math.sqrt(velocity.x * velocity.x + velocity.z * velocity.z);
+    currentSpeed = speed * 3.6; // Convertir m/s a km/h
+
+    // Sistema de Nitro
+    isNitroActive = $keys.shift.isPressed && nitroLevel > 0;
+    
+    if (isNitroActive && ($keys.w.isPressed || $keys.s.isPressed)) {
+      // Consumir nitro
+      nitroLevel = Math.max(0, nitroLevel - delta * 30); // Consume 30% por segundo
+      nitroRegenTimer = 0; // Reset del timer de regeneración
+    } else {
+      // Regenerar nitro después de 2 segundos sin usar
+      nitroRegenTimer += delta;
+      if (nitroRegenTimer > 2 && nitroLevel < 100) {
+        nitroLevel = Math.min(100, nitroLevel + delta * 20); // Regenera 20% por segundo
+      }
     }
 
-    const velocity = currentVelocity + reverseVelocity;
+    // Movimiento con nitro
+    if ($keys.w.isPressed && isNitroActive && nitroLevel > 0) {
+      currentVelocity = 20; // Velocidad con nitro
+    } else if ($keys.w.isPressed && $keys.shift.isPressed) {
+      currentVelocity = 15; // Velocidad normal con shift
+    } else if ($keys.w.isPressed) {
+      currentVelocity = 8; // Velocidad normal
+    } else if ($keys.s.isPressed) {
+      reverseVelocity = -5; // Reversa
+    }
 
-    if (velocity != 0) {
-      const x = Math.sin(thetaCamera) * velocity;
-      const z = Math.cos(thetaCamera) * velocity;
+    const totalVelocity = currentVelocity + reverseVelocity;
+
+    if (totalVelocity != 0) {
+      const x = Math.sin(thetaCamera) * totalVelocity;
+      const z = Math.cos(thetaCamera) * totalVelocity;
       rigidBody.setLinvel({ x, y: 0, z }, true);
     } else {
       const currentVel = rigidBody.linvel();
@@ -194,9 +222,9 @@ Command: npx @threlte/gltf@3.0.1 .\car.glb -T --draco /draco/
               rotation={[0, Math.PI, 0]}
             >
               <T.MeshBasicMaterial
-                color={"red"}
+                color={isNitroActive ? "blue" : "red"}
                 transparent={true}
-                opacity={0.5}
+                opacity={isNitroActive ? 0.8 : 0.5}
                 blending={CustomBlending}
                 blendDst={OneFactor}
                 blendEquation={AddEquation}
@@ -249,7 +277,7 @@ Command: npx @threlte/gltf@3.0.1 .\car.glb -T --draco /draco/
               position={[0, 0.84, 0]}
               rotation={[Math.PI / 2, 0, 0]}
             >
-              <MeshLineMaterial color="#6355df" linewidth={0.1} />
+              <MeshLineMaterial color={isNitroActive ? "#00ffff" : "#6355df"} linewidth={0.1} />
             </T.Mesh>
             <T.Mesh
               geometry={gltf.nodes.stop_light_2.geometry}
