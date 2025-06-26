@@ -52,10 +52,13 @@
     </T.Mesh>
   </AutoColliders>
 
-  <!-- Floating Icon - Se oculta cuando el diálogo está abierto -->
+  <!-- Floating Icon - Se oculta completamente cuando el diálogo está abierto -->
   <T.Group position={[0, 1.5, 0]} rotation={[0, 0, 0]}>
-    <HTML transform occlude={$showAlgorandDialog}>
-      <div class="flex flex-col items-center pointer-events-none">
+    <HTML transform>
+      <div 
+        class="flex flex-col items-center pointer-events-none"
+        style="display: {$showAlgorandDialog ? 'none' : 'flex'}"
+      >
         <!-- Algorand Icon -->
         <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-2 animate-bounce">
           <Wallet class="w-6 h-6 text-white" />
