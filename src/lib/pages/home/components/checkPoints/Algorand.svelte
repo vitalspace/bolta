@@ -1,6 +1,7 @@
 <script lang="ts">
     import { T } from "@threlte/core"
       import { AutoColliders, Collider, RigidBody } from "@threlte/rapier";
+    import { FakeGlowMaterial, HTML, useDraco, useGltf } from "@threlte/extras";
 
 </script>
 
