@@ -4,14 +4,14 @@
 </script>
 
 
-    <T.Group>
+    <T.Group position={[0, 0, -5]}>
       <AutoColliders
         shape="cuboid"
         sensor={true}
         onsensorenter={() => {}}
         onsensorexit={() => {}}
       >
-        <T.Mesh position={[55.69, 3.3, -40.19]}>
+        <T.Mesh >
           <T.CylinderGeometry args={[0.4, 0.4, 0.5]} />
           <FakeGlowMaterial
             glowColor="green"
@@ -22,3 +22,5 @@
           />
         </T.Mesh>
       </AutoColliders>
+    </T.Group>T.Group>
+      
