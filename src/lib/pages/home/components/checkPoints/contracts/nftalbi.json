@@ -1,0 +1,29 @@
+{
+  "contract": {
+    "name": "TaskManager",
+    "methods": [
+      {
+        "name": "payment",
+        "args": [],
+        "returns": {
+          "type": "void"
+        }
+      },
+      {
+        "name": "nonFungibleAssetCreateAndSend",
+        "args": [],
+        "returns": {
+          "type": "void"
+        }
+      },
+      {
+        "name": "fungibleAssetCreate",
+        "args": [],
+        "returns": {
+          "type": "void"
+        }
+      }
+    ],
+    "networks": {}
+  }
+}
