@@ -27,8 +27,6 @@ Command: npx @threlte/gltf@3.0.1 .\man.glb -T --draco /draco/
   export const { actions, mixer } = useGltfAnimations(gltf, ref);
   const { camera } = useThrelte();
 
-  console.log("Available animations:", actions);
-
   let isActive = $derived(!$isInVehicle);
   let isVisible = $derived($playerVisible);
   const v3 = new Vector3();
@@ -37,16 +35,6 @@ Command: npx @threlte/gltf@3.0.1 .\man.glb -T --draco /draco/
   let objectRef: Group | undefined = $state<Group>();
   let controls: ThirdPersonControls | undefined;
   let position: [number, number, number] = $state([0, 5, 0]);
-
-  // Jump and animation state variables
-  let isGrounded = $state(true);
-  let isJumping = $state(false);
-  let jumpCooldown = $state(0);
-  
-  const JUMP_FORCE = 8;
-  const JUMP_COOLDOWN_TIME = 0.5; // Reduced cooldown
-  const GROUND_CHECK_THRESHOLD = 0.5; // More lenient ground check
-  const GROUND_Y_POSITION = 1.5; // Adjust based on your ground level
 
   // @ts-ignore
   delete actions["T Pose"];
@@ -82,35 +70,8 @@ Command: npx @threlte/gltf@3.0.1 .\man.glb -T --draco /draco/
     }
   });
 
-  useTask((delta) => {
+  useTask(() => {
     if (!rigidBody || !objectRef || !cameraRef || !controls) return;
-
-    // Update jump cooldown
-    if (jumpCooldown > 0) {
-      jumpCooldown -= delta;
-    }
-
-    // Check if player is grounded
-    const velocity = rigidBody.linvel();
-    const pos = rigidBody.translation();
-    
-    // Improved ground detection
-    const wasGrounded = isGrounded;
-    isGrounded = Math.abs(velocity.y) < GROUND_CHECK_THRESHOLD && pos.y <= GROUND_Y_POSITION;
-
-    // Detect landing - when we transition from not grounded to grounded AND we were jumping
-    if (!wasGrounded && isGrounded && isJumping) {
-      console.log("Player landed! Stopping jump animation");
-      isJumping = false;
-      $actions.Jumping?.stop();
-    }
-
-    // Also stop jumping if we've been "jumping" for too long (fallback)
-    if (isJumping && isGrounded && Math.abs(velocity.y) < 0.1) {
-      console.log("Force stopping jump animation - player is clearly grounded");
-      isJumping = false;
-      $actions.Jumping?.stop();
-    }
 
     // Handle vehicle exit position within the physics loop
     if ($gameState.vehicleExitPosition && isVisible) {
@@ -151,36 +112,13 @@ Command: npx @threlte/gltf@3.0.1 .\man.glb -T --draco /draco/
 
     rigidBody.setAngvel({ x: 0, y: clampedAngularVelocity, z: 0 }, true);
 
+    const pos = rigidBody.translation();
     position = [pos.x, pos.y, pos.z];
     gameActions.updatePlayerPosition(position);
 
     let currentVelocity = 0;
 
-    // Handle jump - ONLY start jump if grounded and not already jumping
-    if ($keys.space.isPressed && isGrounded && jumpCooldown <= 0 && !isJumping) {
-      console.log("Player jumping! Starting jump animation");
-      
-      // Stop all other animations immediately
-      $actions.idle?.stop();
-      $actions.walk?.stop();
-      $actions.Running?.stop();
-      
-      // Start jump animation
-      $actions.Jumping?.reset();
-      $actions.Jumping?.play();
-      
-      // Apply upward impulse
-      rigidBody.applyImpulse({ x: 0, y: JUMP_FORCE, z: 0 }, true);
-      
-      // Set jump state
-      jumpCooldown = JUMP_COOLDOWN_TIME;
-      isGrounded = false;
-      isJumping = true;
-      
-      console.log("Jump initiated - isJumping:", isJumping, "Y velocity:", velocity.y);
-    }
-
-    // Movement logic
+    // Movement
     if ($keys.w.isPressed && $keys.shift.isPressed) {
       currentVelocity = 6;
     } else if ($keys.w.isPressed) {
@@ -190,43 +128,32 @@ Command: npx @threlte/gltf@3.0.1 .\man.glb -T --draco /draco/
     if (currentVelocity > 0) {
       const x = Math.sin(thetaCamera) * currentVelocity;
       const z = Math.cos(thetaCamera) * currentVelocity;
-      
-      // Preserve Y velocity for jumping/falling
-      const currentYVelocity = rigidBody.linvel().y;
-      rigidBody.setLinvel({ x, y: currentYVelocity, z }, true);
+      rigidBody.setLinvel({ x, y: 0, z }, true);
 
-      // Animation transitions - ONLY if not jumping
-      if (!isJumping) {
-        $actions.idle?.stop();
-        if (currentVelocity === 6) {
-          $actions.walk?.stop();
-          $actions.Running?.reset();
-          $actions.Running?.play();
-        } else {
-          $actions.Running?.stop();
-          $actions.walk?.reset();
-          $actions.walk?.play();
-        }
+      // Animation transitions
+      $actions.idle?.reset();
+      if (currentVelocity === 6) {
+        $actions.walk?.reset();
+        $actions.Running?.play();
+      } else {
+        $actions.Running?.reset();
+        $actions.walk?.play();
       }
     } else {
-      // When not moving, gradually stop horizontal movement but preserve Y velocity
+      // When not moving, gradually stop
       const currentVel = rigidBody.linvel();
       rigidBody.setLinvel(
         {
           x: currentVel.x * 0.9,
-          y: currentVel.y, // Don't dampen Y velocity (for jumping/falling)
+          y: currentVel.y,
           z: currentVel.z * 0.9,
         },
         true
       );
 
-      // Play idle animation - ONLY if not jumping
-      if (!isJumping) {
-        $actions.walk?.stop();
-        $actions.Running?.stop();
-        $actions.idle?.reset();
-        $actions.idle?.play();
-      }
+      $actions.walk?.stop();
+      $actions.Running?.stop();
+      $actions.idle?.play();
     }
 
     controls.update(0, 0);
