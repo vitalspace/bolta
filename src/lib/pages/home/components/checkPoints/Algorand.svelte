@@ -14,6 +14,7 @@
 
     if($keys.e.isPressed && isEnter) {
       console.log("hello")
+      isEnter = false
     }
     
   })
