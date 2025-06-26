@@ -27,7 +27,7 @@ Command: npx @threlte/gltf@3.0.1 .\man.glb -T --draco /draco/
   export const { actions, mixer } = useGltfAnimations(gltf, ref);
   const { camera } = useThrelte();
 
-  console.log(actions)
+  console.log("Available animations:", actions);
 
   let isActive = $derived(!$isInVehicle);
   let isVisible = $derived($playerVisible);
@@ -38,10 +38,13 @@ Command: npx @threlte/gltf@3.0.1 .\man.glb -T --draco /draco/
   let controls: ThirdPersonControls | undefined;
   let position: [number, number, number] = $state([0, 5, 0]);
 
-  // Jump variables
+  // Jump and animation state variables
   let isGrounded = $state(true);
+  let isJumping = $state(false); // New: Track if currently jumping
   let jumpCooldown = $state(0);
-  const JUMP_FORCE = 0.5;
+  let lastGroundedState = $state(true); // Track previous grounded state
+  
+  const JUMP_FORCE = 8;
   const JUMP_COOLDOWN_TIME = 0.3; // seconds
   const GROUND_CHECK_THRESHOLD = 0.1; // How close to ground to be considered grounded
 
@@ -91,8 +94,16 @@ Command: npx @threlte/gltf@3.0.1 .\man.glb -T --draco /draco/
     const velocity = rigidBody.linvel();
     const pos = rigidBody.translation();
     
-    // Simple ground check - if vertical velocity is very small and we're not too high
-    isGrounded = Math.abs(velocity.y) < GROUND_CHECK_THRESHOLD && pos.y < 6; // Adjust based on your ground level
+    // Improved ground check
+    const wasGrounded = isGrounded;
+    isGrounded = Math.abs(velocity.y) < GROUND_CHECK_THRESHOLD && pos.y < 6;
+
+    // Detect landing (transition from not grounded to grounded)
+    if (!wasGrounded && isGrounded && isJumping) {
+      console.log("Player landed! Stopping jump animation");
+      isJumping = false;
+      $actions.Jumping?.stop();
+    }
 
     // Handle vehicle exit position within the physics loop
     if ($gameState.vehicleExitPosition && isVisible) {
@@ -138,64 +149,104 @@ Command: npx @threlte/gltf@3.0.1 .\man.glb -T --draco /draco/
 
     let currentVelocity = 0;
 
-    // Handle jump
-    if ($keys.space.isPressed && isGrounded && jumpCooldown <= 0) {
-
+    // Handle jump - PRIORITY: Jump overrides all other animations
+    if ($keys.space.isPressed && isGrounded && jumpCooldown <= 0 && !isJumping) {
+      console.log("Player jumping! Starting jump animation");
+      
+      // Stop all other animations immediately
+      $actions.idle?.stop();
+      $actions.walk?.stop();
+      $actions.Running?.stop();
+      
+      // Start jump animation
+      $actions.Jumping?.reset();
       $actions.Jumping?.play();
       
       // Apply upward impulse
       rigidBody.applyImpulse({ x: 0, y: JUMP_FORCE, z: 0 }, true);
       
-      // Set cooldown to prevent multiple jumps
+      // Set jump state
       jumpCooldown = JUMP_COOLDOWN_TIME;
       isGrounded = false;
+      isJumping = true;
       
-      // You could add a jump animation here if you have one
-      // $actions.jump?.play();
+      console.log("Jump initiated - isJumping:", isJumping);
     }
 
-    // Movement
-    if ($keys.w.isPressed && $keys.shift.isPressed) {
-      currentVelocity = 6;
-    } else if ($keys.w.isPressed) {
-      currentVelocity = 3;
-    }
+    // Movement logic - ONLY if not jumping
+    if (!isJumping) {
+      if ($keys.w.isPressed && $keys.shift.isPressed) {
+        currentVelocity = 6;
+      } else if ($keys.w.isPressed) {
+        currentVelocity = 3;
+      }
 
-    if (currentVelocity > 0) {
-      const x = Math.sin(thetaCamera) * currentVelocity;
-      const z = Math.cos(thetaCamera) * currentVelocity;
-      
-      // Preserve Y velocity for jumping/falling
-      const currentYVelocity = rigidBody.linvel().y;
-      rigidBody.setLinvel({ x, y: currentYVelocity, z }, true);
-
-      // Animation transitions
-      $actions.idle?.reset();
-      if (currentVelocity === 6) {
-        $actions.walk?.reset();
-        $actions.Running?.play();
-        $actions.Jumping?.stop();
+      if (currentVelocity > 0) {
+        const x = Math.sin(thetaCamera) * currentVelocity;
+        const z = Math.cos(thetaCamera) * currentVelocity;
         
+        // Preserve Y velocity for jumping/falling
+        const currentYVelocity = rigidBody.linvel().y;
+        rigidBody.setLinvel({ x, y: currentYVelocity, z }, true);
+
+        // Animation transitions - ONLY if not jumping
+        $actions.idle?.stop();
+        if (currentVelocity === 6) {
+          $actions.walk?.stop();
+          $actions.Running?.reset();
+          $actions.Running?.play();
+        } else {
+          $actions.Running?.stop();
+          $actions.walk?.reset();
+          $actions.walk?.play();
+        }
       } else {
-        $actions.Jumping?.stop();
-        $actions.Running?.reset();
-        $actions.walk?.play();
+        // When not moving, gradually stop horizontal movement but preserve Y velocity
+        const currentVel = rigidBody.linvel();
+        rigidBody.setLinvel(
+          {
+            x: currentVel.x * 0.9,
+            y: currentVel.y, // Don't dampen Y velocity (for jumping/falling)
+            z: currentVel.z * 0.9,
+          },
+          true
+        );
+
+        // Play idle animation - ONLY if not jumping
+        $actions.walk?.stop();
+        $actions.Running?.stop();
+        $actions.idle?.reset();
+        $actions.idle?.play();
       }
     } else {
-      // When not moving, gradually stop horizontal movement but preserve Y velocity
-      const currentVel = rigidBody.linvel();
-      rigidBody.setLinvel(
-        {
-          x: currentVel.x * 0.9,
-          y: currentVel.y, // Don't dampen Y velocity (for jumping/falling)
-          z: currentVel.z * 0.9,
-        },
-        true
-      );
+      // If jumping, still allow horizontal movement but don't change animations
+      if ($keys.w.isPressed && $keys.shift.isPressed) {
+        currentVelocity = 6;
+      } else if ($keys.w.isPressed) {
+        currentVelocity = 3;
+      }
 
-      $actions.walk?.stop();
-      $actions.Running?.stop();
-      $actions.idle?.play();
+      if (currentVelocity > 0) {
+        const x = Math.sin(thetaCamera) * currentVelocity;
+        const z = Math.cos(thetaCamera) * currentVelocity;
+        
+        // Preserve Y velocity for jumping/falling
+        const currentYVelocity = rigidBody.linvel().y;
+        rigidBody.setLinvel({ x, y: currentYVelocity, z }, true);
+      } else {
+        // When not moving horizontally while jumping, gradually stop horizontal movement
+        const currentVel = rigidBody.linvel();
+        rigidBody.setLinvel(
+          {
+            x: currentVel.x * 0.9,
+            y: currentVel.y, // Preserve Y velocity
+            z: currentVel.z * 0.9,
+          },
+          true
+        );
+      }
+      
+      console.log("Currently jumping - blocking other animations. Grounded:", isGrounded, "Y velocity:", velocity.y);
     }
 
     controls.update(0, 0);
