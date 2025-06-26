@@ -70,30 +70,28 @@ Command: npx @threlte/gltf@3.0.1 .\man.glb -T --draco /draco/
     }
   });
 
-  // Efecto para manejar la posición de salida del vehículo
-  $effect(() => {
-    if ($gameState.vehicleExitPosition && rigidBody && isVisible) {
+  useTask(() => {
+    if (!rigidBody || !objectRef || !cameraRef || !controls) return;
+
+    // Handle vehicle exit position within the physics loop
+    if ($gameState.vehicleExitPosition && isVisible) {
       console.log("Setting player position to exit position:", $gameState.vehicleExitPosition);
       
-      // Aplicar la nueva posición al rigid body
+      // Apply the new position to the rigid body
       rigidBody.setTranslation({
         x: $gameState.vehicleExitPosition[0],
         y: $gameState.vehicleExitPosition[1],
         z: $gameState.vehicleExitPosition[2]
       }, true);
       
-      // Actualizar la posición local
+      // Update the local position
       position = $gameState.vehicleExitPosition;
       
-      // Limpiar la posición de salida
+      // Clear the exit position
       gameActions.applyExitPosition();
     }
-  });
 
-  useTask(() => {
-    if (!rigidBody || !objectRef || !cameraRef || !controls) return;
-
-    // Solo procesar si el jugador está activo (no en vehículo)
+    // Only process if the player is active (not in vehicle)
     if (!isActive) return;
 
     const cameraDirection = cameraRef.getWorldDirection(v3);
@@ -120,7 +118,7 @@ Command: npx @threlte/gltf@3.0.1 .\man.glb -T --draco /draco/
 
     let currentVelocity = 0;
 
-    // Movimiento
+    // Movement
     if ($keys.w.isPressed && $keys.shift.isPressed) {
       currentVelocity = 6;
     } else if ($keys.w.isPressed) {
@@ -132,7 +130,7 @@ Command: npx @threlte/gltf@3.0.1 .\man.glb -T --draco /draco/
       const z = Math.cos(thetaCamera) * currentVelocity;
       rigidBody.setLinvel({ x, y: 0, z }, true);
 
-      // Transición de animaciones
+      // Animation transitions
       $actions.idle?.reset();
       if (currentVelocity === 6) {
         $actions.walk?.reset();
@@ -151,7 +149,7 @@ Command: npx @threlte/gltf@3.0.1 .\man.glb -T --draco /draco/
   });
 </script>
 
-<!-- Solo renderizar el jugador si es visible -->
+<!-- Only render the player if visible -->
 {#if isVisible}
   <T is={ref} dispose={false} {...props}>
     {#await gltf}
@@ -204,7 +202,7 @@ Command: npx @threlte/gltf@3.0.1 .\man.glb -T --draco /draco/
     {@render children?.({ ref })}
   </T>
 {:else}
-  <!-- Mensaje de debug cuando el jugador está oculto -->
+  <!-- Debug message when player is hidden -->
   <!-- <div style="position: fixed; top: 10px; left: 10px; color: white; background: rgba(0,0,0,0.5); padding: 10px;">
     Player is hidden (in vehicle)
   </div> -->
