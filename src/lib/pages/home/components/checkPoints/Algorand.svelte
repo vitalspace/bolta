@@ -12,7 +12,7 @@
 
   useTask(() => {
 
-    if($keys.e.isPressed && isEnter) {
+    if(isEnter) {
       console.log("hello")
     }
     
