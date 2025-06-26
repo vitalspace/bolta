@@ -4,7 +4,7 @@
   import { FakeGlowMaterial, HTML, useDraco, useGltf } from "@threlte/extras";
   import { keys } from "../../stores/stores";
 
-  let isEnter = $state();
+  let isEnter: bool = $state(false);
 
   const handleEnter = () => isEnter = true;
   const handleExit = () => isEnter = false;
