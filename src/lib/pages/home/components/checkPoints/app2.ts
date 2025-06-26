@@ -284,7 +284,7 @@ class App {
         suggestedParams: params,
         appIndex: appId,
         onComplete: algosdk.OnApplicationComplete.NoOpOC,
-        appArgs: [new TextEncoder().encode("nonFungibleAssetCreateAndSend")],
+        appArgs: [new TextEncoder().encode("nonFungibleAssetCreate")],
       });
 
       const result = await this.signTransaction([txn], [0]);
