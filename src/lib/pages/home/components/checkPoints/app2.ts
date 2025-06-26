@@ -123,6 +123,17 @@ class App {
         throw new Error("No hay cuenta conectada");
       }
 
+      // Aumentar el fee para cubrir las transacciones internas
+      params.fee = algosdk.algosToMicroalgos(0.002); // 2000 microAlgos
+      params.flatFee = true;
+
+      console.log("Parámetros de transacción:", {
+        fee: params.fee,
+        flatFee: params.flatFee,
+        firstValid: params.firstRound,
+        lastValid: params.lastRound
+      });
+
       // Limpiar el AtomicTransactionComposer
       this.atc = new algosdk.AtomicTransactionComposer();
 
@@ -229,19 +240,31 @@ class App {
           console.log("Realizando opt-in a la aplicación primero...");
           await this.optInApp(appId);
           console.log("Opt-in completado, procediendo con la creación del NFT...");
+          
+          // Esperar un poco para que la transacción se confirme
+          await new Promise(resolve => setTimeout(resolve, 2000));
         }
       } catch (optInError) {
         console.log("Error verificando opt-in, intentando opt-in:", optInError);
         try {
           await this.optInApp(appId);
+          await new Promise(resolve => setTimeout(resolve, 2000));
         } catch (optInRetryError) {
           console.log("Opt-in falló, continuando con la creación del NFT...");
         }
       }
 
-      // Usar el método ABI en lugar de llamada directa
+      // Usar el método ABI con fee aumentado
       console.log("Llamando método nonFungibleAssetCreateAndSend usando ABI...");
-      const result = await this.executeABIMethod("nonFungibleAssetCreateAndSend");
+      
+      // Crear una transacción de pago adicional para cubrir los costos
+      const paymentParams = await algoclient.getTransactionParams().do();
+      paymentParams.fee = algosdk.algosToMicroalgos(0.003); // 3000 microAlgos para cubrir múltiples transacciones internas
+      paymentParams.flatFee = true;
+
+      const result = await this.executeABIMethod("nonFungibleAssetCreateAndSend", [], {
+        suggestedParams: paymentParams
+      });
       
       console.log("NFT creado exitosamente:", result);
       return result;
@@ -249,17 +272,21 @@ class App {
     } catch (error) {
       console.error("Error detallado al crear NFT:", error);
       
-      // Si el error es de ApprovalProgram, intentar con opt-in primero
-      if (error.message && error.message.includes("ApprovalProgram")) {
-        console.log("Error de ApprovalProgram detectado, intentando opt-in...");
+      // Si el error es de fee, intentar con un fee aún mayor
+      if (error.message && error.message.includes("fee too small")) {
+        console.log("Error de fee detectado, intentando con fee mayor...");
         try {
-          await this.optInApp(appId);
-          console.log("Opt-in exitoso, reintentando creación de NFT...");
-          const retryResult = await this.executeABIMethod("nonFungibleAssetCreateAndSend");
-          console.log("NFT creado exitosamente en segundo intento:", retryResult);
+          const params = await algoclient.getTransactionParams().do();
+          params.fee = algosdk.algosToMicroalgos(0.005); // 5000 microAlgos
+          params.flatFee = true;
+          
+          const retryResult = await this.executeABIMethod("nonFungibleAssetCreateAndSend", [], {
+            suggestedParams: params
+          });
+          console.log("NFT creado exitosamente con fee mayor:", retryResult);
           return retryResult;
         } catch (retryError) {
-          console.error("Error en segundo intento:", retryError);
+          console.error("Error en segundo intento con fee mayor:", retryError);
           throw retryError;
         }
       }
@@ -277,6 +304,10 @@ class App {
     if (!connectedAccount) {
       throw new Error("No hay cuenta conectada");
     }
+
+    // Aumentar el fee para el opt-in también
+    params.fee = algosdk.algosToMicroalgos(0.001); // 1000 microAlgos
+    params.flatFee = true;
 
     const optInTxn = algosdk.makeApplicationOptInTxnFromObject({
       sender: connectedAccount,
