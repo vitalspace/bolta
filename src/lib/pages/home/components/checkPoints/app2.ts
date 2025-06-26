@@ -232,17 +232,15 @@ class App {
       }
 
       // Verificar si la cuenta ya hizo opt-in a la aplicación
-      const appsLocalState = accountInfo['apps-local-state'] || [];
-      const hasOptedIn = Array.isArray(appsLocalState) && appsLocalState.some((app: any) => app.id === appId);
+      const appsLocalStateRaw = accountInfo['apps-local-state'];
+      const appsLocalState = Array.isArray(appsLocalStateRaw) ? [...appsLocalStateRaw] : [];
+      const hasOptedIn = appsLocalState.some((app: any) => app.id === appId);
       
       if (!hasOptedIn) {
         console.log("Realizando opt-in a la aplicación primero...");
         try {
           await this.optInApp(appId);
-          console.log("Opt-in completado, esperando confirmación...");
-          
-          // Esperar un poco más para que la transacción se confirme
-          await new Promise(resolve => setTimeout(resolve, 3000));
+          console.log("Opt-in completado");
         } catch (optInError) {
           console.error("Error en opt-in:", optInError);
           throw new Error("Error al hacer opt-in a la aplicación");
