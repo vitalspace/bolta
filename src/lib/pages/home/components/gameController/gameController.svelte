@@ -22,22 +22,28 @@
   let toTarget = new Vector3();
 
   const handleVehicleToggle = () => {
-    gameState.update(($gameState) => {
-      if ($gameState.controlMode === "player" && $gameState.canEnterVehicle) {
-        // Entrar al vehículo - iniciar transición
-        startCameraTransition("vehicle");
-        gameActions.enterVehicle();
-      } else if ($gameState.controlMode === "vehicle") {
-        // Salir del vehículo - iniciar transición
-        startCameraTransition("player");
-        gameActions.exitVehicle();
-      }
-      return $gameState;
-    });
+    console.log("Toggle vehicle pressed, current state:", $gameState);
+    
+    if ($gameState.controlMode === "player" && $gameState.canEnterVehicle) {
+      console.log("Entering vehicle...");
+      // Entrar al vehículo - iniciar transición
+      gameActions.enterVehicle();
+      startCameraTransition("vehicle");
+    } else if ($gameState.controlMode === "vehicle") {
+      console.log("Exiting vehicle...");
+      // Salir del vehículo - iniciar transición
+      gameActions.exitVehicle();
+      startCameraTransition("player");
+    }
   };
 
   const startCameraTransition = (targetMode: "player" | "vehicle") => {
-    if (!cameraRef) return;
+    if (!cameraRef) {
+      console.log("No camera ref available");
+      return;
+    }
+    
+    console.log("Starting camera transition to:", targetMode);
     
     isTransitioning = true;
     transitionProgress = 0;
@@ -53,11 +59,13 @@
       const vehiclePos = $gameState.currentVehicle.position;
       toPosition.set(vehiclePos[0], vehiclePos[1] + 3, vehiclePos[2] - 8);
       toTarget.set(vehiclePos[0], vehiclePos[1], vehiclePos[2]);
+      console.log("Vehicle transition - from:", fromPosition, "to:", toPosition);
     } else {
       // Posición detrás del jugador
       const playerPos = $gameState.playerPosition;
       toPosition.set(playerPos[0], playerPos[1] + 3, playerPos[2] - 5);
       toTarget.set(playerPos[0], playerPos[1], playerPos[2]);
+      console.log("Player transition - from:", fromPosition, "to:", toPosition);
     }
   };
 
@@ -105,6 +113,7 @@
       if (transitionProgress >= 1) {
         transitionProgress = 1;
         isTransitioning = false;
+        console.log("Transition completed");
       }
       
       // Interpolación suave usando easing
@@ -133,6 +142,11 @@
       document.removeEventListener("keydown", (e) => handleKeysPress(e, true));
       document.removeEventListener("keyup", (e) => handleKeysPress(e, false));
     };
+  });
+
+  // Debug: mostrar estado actual
+  $effect(() => {
+    console.log("Game state changed:", $gameState);
   });
 </script>
 

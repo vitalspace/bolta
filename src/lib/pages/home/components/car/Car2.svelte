@@ -94,6 +94,7 @@ Command: npx @threlte/gltf@3.0.1 .\car.glb -T --draco /draco/
 
   $effect(() => {
     if (mainGroupRef) {
+      console.log("Registering vehicle with ID:", carId);
       gameActions.registerVehicle({
         id: carId,
         reference: mainGroupRef!,
@@ -169,6 +170,7 @@ Command: npx @threlte/gltf@3.0.1 .\car.glb -T --draco /draco/
       controls.update(0, 0);
     }
   });
+
 </script>
 
 <T.Group bind:ref dispose={false} {...props}>

@@ -37,6 +37,8 @@ export const gameActions = {
       const exists = state.nearbyVehicles.find(v => v.id === vehicle.id);
       if (exists) return state;
       
+      console.log("Vehicle registered:", vehicle.id);
+      
       return {
         ...state,
         nearbyVehicles: [...state.nearbyVehicles, vehicle],
@@ -62,10 +64,16 @@ export const gameActions = {
         return distance < 5; // 5 unidades de distancia
       });
 
+      const canEnter = nearby.length > 0 && state.controlMode === "player";
+      
+      if (canEnter !== state.canEnterVehicle) {
+        console.log("Can enter vehicle changed:", canEnter, "Nearby vehicles:", nearby.length);
+      }
+
       return {
         ...state,
         playerPosition: playerPos,
-        canEnterVehicle: nearby.length > 0 && state.controlMode === "player",
+        canEnterVehicle: canEnter,
       };
     });
   },
@@ -93,7 +101,10 @@ export const gameActions = {
 
   enterVehicle: () => {
     gameState.update((state) => {
-      if (!state.canEnterVehicle) return state;
+      if (!state.canEnterVehicle) {
+        console.log("Cannot enter vehicle - not near any vehicle");
+        return state;
+      }
       
       let nearestVehicle: Vehicle | null = null;
       let minDistance = Infinity;
@@ -109,6 +120,7 @@ export const gameActions = {
       }
 
       if (nearestVehicle) {
+        console.log("Entering vehicle:", nearestVehicle.id);
         return {
           ...state,
           currentVehicle: nearestVehicle,
@@ -116,15 +128,20 @@ export const gameActions = {
           canEnterVehicle: false,
         };
       }
+      
+      console.log("No nearest vehicle found");
       return state;
     });
   },
 
   exitVehicle: () => {
-    gameState.update((state) => ({
-      ...state,
-      currentVehicle: null,
-      controlMode: "player",
-    }));
+    gameState.update((state) => {
+      console.log("Exiting vehicle");
+      return {
+        ...state,
+        currentVehicle: null,
+        controlMode: "player",
+      };
+    });
   },
 };
