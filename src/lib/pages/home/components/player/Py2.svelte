@@ -45,7 +45,7 @@ Command: npx @threlte/gltf@3.0.1 .\man.glb -T --draco /draco/
   let lastGroundedState = $state(true); // Track previous grounded state
   
   const JUMP_FORCE = 0.5;
-  const JUMP_COOLDOWN_TIME = 1; // seconds
+  const JUMP_COOLDOWN_TIME = 5; // seconds
   const GROUND_CHECK_THRESHOLD = 0.1; // How close to ground to be considered grounded
 
   // @ts-ignore
