@@ -10,7 +10,7 @@ Command: npx @threlte/gltf@3.0.1 .\man.glb -T --draco /draco/
   import { Collider, RigidBody } from "@threlte/rapier";
   import { Group, PerspectiveCamera, Vector3 } from "three";
   import { ThirdPersonControls } from "../controls/thirdPersonControls";
-  import { keys, isInVehicle, gameActions } from "../../stores/stores";
+  import { keys, isInVehicle, gameActions, playerVisible, gameState } from "../../stores/stores";
 
   let {
     cameraRef,
@@ -28,6 +28,7 @@ Command: npx @threlte/gltf@3.0.1 .\man.glb -T --draco /draco/
   const { camera } = useThrelte();
 
   let isActive = $derived(!$isInVehicle);
+  let isVisible = $derived($playerVisible);
   const v3 = new Vector3();
   let mainGroupRef: Group | undefined = $state<Group>();
   let rigidBody: RapierRigidBody | undefined = $state<RapierRigidBody>();
@@ -66,6 +67,26 @@ Command: npx @threlte/gltf@3.0.1 .\man.glb -T --draco /draco/
           }
         });
       }
+    }
+  });
+
+  // Efecto para manejar la posición de salida del vehículo
+  $effect(() => {
+    if ($gameState.vehicleExitPosition && rigidBody && isVisible) {
+      console.log("Setting player position to exit position:", $gameState.vehicleExitPosition);
+      
+      // Aplicar la nueva posición al rigid body
+      rigidBody.setTranslation({
+        x: $gameState.vehicleExitPosition[0],
+        y: $gameState.vehicleExitPosition[1],
+        z: $gameState.vehicleExitPosition[2]
+      }, true);
+      
+      // Actualizar la posición local
+      position = $gameState.vehicleExitPosition;
+      
+      // Limpiar la posición de salida
+      gameActions.applyExitPosition();
     }
   });
 
@@ -130,53 +151,61 @@ Command: npx @threlte/gltf@3.0.1 .\man.glb -T --draco /draco/
   });
 </script>
 
-<T is={ref} dispose={false} {...props}>
-  {#await gltf}
-    {@render fallback?.()}
-  {:then gltf}
-    <T.Group name="Scene" {position} bind:ref={mainGroupRef} dispose={false}>
-      <RigidBody bind:rigidBody enabledRotations={[false, true, false]}>
-        <Collider shape="capsule" args={[0.2, 0.2]}>
-          <T.Group
-            position={[0, -0.4, 0]}
-            name="Armature"
-            rotation={[Math.PI / 2, 0, 0]}
-            scale={0.015}
-          >
-            <T is={gltf.nodes.mixamorigHips} />
-            <T.Group name="tripo_node_ca4578fd004" bind:ref={objectRef}>
-              <T.SkinnedMesh
-                name="tripo_mesh_ca4578fd020"
-                geometry={gltf.nodes.tripo_mesh_ca4578fd020.geometry}
-                material={gltf.materials["Material.019"]}
-                skeleton={gltf.nodes.tripo_mesh_ca4578fd020.skeleton}
-              />
-              <T.SkinnedMesh
-                name="tripo_mesh_ca4578fd020_1"
-                geometry={gltf.nodes.tripo_mesh_ca4578fd020_1.geometry}
-                material={gltf.materials.tripo_mat_ca4578fd}
-                skeleton={gltf.nodes.tripo_mesh_ca4578fd020_1.skeleton}
-              />
-              <T.SkinnedMesh
-                name="tripo_mesh_ca4578fd020_2"
-                geometry={gltf.nodes.tripo_mesh_ca4578fd020_2.geometry}
-                material={gltf.materials["Material.021"]}
-                skeleton={gltf.nodes.tripo_mesh_ca4578fd020_2.skeleton}
-              />
-              <T.SkinnedMesh
-                name="tripo_mesh_ca4578fd020_3"
-                geometry={gltf.nodes.tripo_mesh_ca4578fd020_3.geometry}
-                material={gltf.materials["Material.022"]}
-                skeleton={gltf.nodes.tripo_mesh_ca4578fd020_3.skeleton}
-              />
+<!-- Solo renderizar el jugador si es visible -->
+{#if isVisible}
+  <T is={ref} dispose={false} {...props}>
+    {#await gltf}
+      {@render fallback?.()}
+    {:then gltf}
+      <T.Group name="Scene" {position} bind:ref={mainGroupRef} dispose={false}>
+        <RigidBody bind:rigidBody enabledRotations={[false, true, false]}>
+          <Collider shape="capsule" args={[0.2, 0.2]}>
+            <T.Group
+              position={[0, -0.4, 0]}
+              name="Armature"
+              rotation={[Math.PI / 2, 0, 0]}
+              scale={0.015}
+            >
+              <T is={gltf.nodes.mixamorigHips} />
+              <T.Group name="tripo_node_ca4578fd004" bind:ref={objectRef}>
+                <T.SkinnedMesh
+                  name="tripo_mesh_ca4578fd020"
+                  geometry={gltf.nodes.tripo_mesh_ca4578fd020.geometry}
+                  material={gltf.materials["Material.019"]}
+                  skeleton={gltf.nodes.tripo_mesh_ca4578fd020.skeleton}
+                />
+                <T.SkinnedMesh
+                  name="tripo_mesh_ca4578fd020_1"
+                  geometry={gltf.nodes.tripo_mesh_ca4578fd020_1.geometry}
+                  material={gltf.materials.tripo_mat_ca4578fd}
+                  skeleton={gltf.nodes.tripo_mesh_ca4578fd020_1.skeleton}
+                />
+                <T.SkinnedMesh
+                  name="tripo_mesh_ca4578fd020_2"
+                  geometry={gltf.nodes.tripo_mesh_ca4578fd020_2.geometry}
+                  material={gltf.materials["Material.021"]}
+                  skeleton={gltf.nodes.tripo_mesh_ca4578fd020_2.skeleton}
+                />
+                <T.SkinnedMesh
+                  name="tripo_mesh_ca4578fd020_3"
+                  geometry={gltf.nodes.tripo_mesh_ca4578fd020_3.geometry}
+                  material={gltf.materials["Material.022"]}
+                  skeleton={gltf.nodes.tripo_mesh_ca4578fd020_3.skeleton}
+                />
+              </T.Group>
             </T.Group>
-          </T.Group>
-        </Collider>
-      </RigidBody>
-    </T.Group>
-  {:catch err}
-    {@render error?.({ error: err })}
-  {/await}
+          </Collider>
+        </RigidBody>
+      </T.Group>
+    {:catch err}
+      {@render error?.({ error: err })}
+    {/await}
 
-  {@render children?.({ ref })}
-</T>
+    {@render children?.({ ref })}
+  </T>
+{:else}
+  <!-- Mensaje de debug cuando el jugador está oculto -->
+  <!-- <div style="position: fixed; top: 10px; left: 10px; color: white; background: rgba(0,0,0,0.5); padding: 10px;">
+    Player is hidden (in vehicle)
+  </div> -->
+{/if}

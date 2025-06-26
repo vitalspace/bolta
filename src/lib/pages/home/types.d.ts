@@ -15,4 +15,5 @@ export interface GameState {
   controlMode: "player" | "vehicle";
   canEnterVehicle: boolean;
   playerReference: Group | null;
+  vehicleExitPosition: [number, number, number] | null; // Nueva propiedad
 }

@@ -4,7 +4,8 @@
   import {
     gameActions,
     gameState,
-    keys
+    keys,
+    playerVisible
   } from "../../stores/stores";
   import Car from "../car/Car2.svelte";
   import Player from "../player/Py2.svelte";
@@ -144,7 +145,15 @@
     };
   });
 
-  // Debug: mostrar estado actual
+  // Debug: mostrar estado actual en pantalla
+  $effect(() => {
+    console.log("Game state changed:", {
+      controlMode: $gameState.controlMode,
+      canEnterVehicle: $gameState.canEnterVehicle,
+      currentVehicle: $gameState.currentVehicle?.id,
+      playerVisible: $playerVisible
+    });
+  });
 </script>
 
 <T.PerspectiveCamera makeDefault bind:ref={cameraRef} />
@@ -158,3 +167,17 @@
   {cameraRef}
   {isTransitioning}
 />
+
+<!-- Debug UI -->
+<div style="position: fixed; top: 10px; right: 10px; color: white; background: rgba(0,0,0,0.7); padding: 15px; border-radius: 5px; font-family: monospace; font-size: 12px;">
+  <div><strong>Debug Info:</strong></div>
+  <div>Control Mode: {$gameState.controlMode}</div>
+  <div>Can Enter Vehicle: {$gameState.canEnterVehicle}</div>
+  <div>Player Visible: {$playerVisible}</div>
+  <div>Current Vehicle: {$gameState.currentVehicle?.id || 'None'}</div>
+  <div>Player Position: [{$gameState.playerPosition[0].toFixed(1)}, {$gameState.playerPosition[1].toFixed(1)}, {$gameState.playerPosition[2].toFixed(1)}]</div>
+  {#if $gameState.currentVehicle}
+    <div>Vehicle Position: [{$gameState.currentVehicle.position[0].toFixed(1)}, {$gameState.currentVehicle.position[1].toFixed(1)}, {$gameState.currentVehicle.position[2].toFixed(1)}]</div>
+  {/if}
+  <div style="margin-top: 10px; color: #ffff00;">Press 'E' near vehicle to enter/exit</div>
+</div>
