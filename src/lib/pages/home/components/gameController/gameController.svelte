@@ -24,10 +24,8 @@
   let toTarget = new Vector3();
 
   const handleVehicleToggle = () => {
-    console.log("Toggle vehicle pressed, current state:", $gameState);
     
     if ($gameState.controlMode === "player" && $gameState.canEnterVehicle) {
-      console.log("Entering vehicle...");
       // Enter vehicle - start transition
       gameActions.enterVehicle();
       startCameraTransition("vehicle");
@@ -37,8 +35,6 @@
       gameActions.exitVehicle();
       startCameraTransition("player");
     } else {
-      console.log("Cannot toggle vehicle. Can enter:", $gameState.canEnterVehicle);
-      console.log("Vehicles in sensor range:", Array.from($gameState.vehicleSensorStates.keys()));
     }
   };
 
