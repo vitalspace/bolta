@@ -96,38 +96,39 @@ Command: npx @threlte/gltf@3.0.1 .\man.glb -T --draco /draco/
 
     const cameraDirection = cameraRef.getWorldDirection(v3);
     const thetaCamera = Math.atan2(cameraDirection.x, cameraDirection.z);
+    const objectDirection = objectRef.getWorldDirection(v3);
+    const thetaObject = Math.atan2(objectDirection.x, objectDirection.z);
+
+    let deltaTheta = thetaCamera - thetaObject;
+    if (deltaTheta > Math.PI) deltaTheta -= Math.PI * 2;
+    if (deltaTheta < -Math.PI) deltaTheta += Math.PI * 2;
+
+    const rotationSpeed = 10;
+    const angularVelocityY = deltaTheta * rotationSpeed;
+    const maxAngularVelocity = 15;
+    const clampedAngularVelocity =
+      Math.sign(angularVelocityY) *
+      Math.min(Math.abs(angularVelocityY), maxAngularVelocity);
+
+    rigidBody.setAngvel({ x: 0, y: clampedAngularVelocity, z: 0 }, true);
 
     const pos = rigidBody.translation();
     position = [pos.x, pos.y, pos.z];
     gameActions.updatePlayerPosition(position);
 
     let currentVelocity = 0;
-    let isMoving = false;
 
     // Movement
     if ($keys.w.isPressed && $keys.shift.isPressed) {
       currentVelocity = 6;
-      isMoving = true;
     } else if ($keys.w.isPressed) {
       currentVelocity = 3;
-      isMoving = true;
     }
 
-    if (isMoving) {
-      // Calculate movement direction
+    if (currentVelocity > 0) {
       const x = Math.sin(thetaCamera) * currentVelocity;
       const z = Math.cos(thetaCamera) * currentVelocity;
       rigidBody.setLinvel({ x, y: 0, z }, true);
-
-      // Rotate player to face movement direction
-      // Add PI to make the player face the correct direction
-      const targetRotation = thetaCamera + Math.PI;
-      rigidBody.setAngvel({ x: 0, y: 0, z: 0 }, true);
-      
-      // Set the rotation directly to the main group
-      if (mainGroupRef) {
-        mainGroupRef.rotation.y = targetRotation;
-      }
 
       // Animation transitions
       $actions.idle?.reset();
@@ -166,12 +167,12 @@ Command: npx @threlte/gltf@3.0.1 .\man.glb -T --draco /draco/
       {@render fallback?.()}
     {:then gltf}
       <T.Group name="Scene" {position} bind:ref={mainGroupRef} dispose={false}>
-        <RigidBody bind:rigidBody enabledRotations={[false, false, false]}>
+        <RigidBody bind:rigidBody enabledRotations={[false, true, false]}>
           <Collider shape="capsule" args={[0.2, 0.2]}>
             <T.Group
               position={[0, -0.4, 0]}
               name="Armature"
-              rotation={[Math.PI / 2, 0, 0]}
+              rotation={[Math.PI / 2, 0, Math.PI]}
               scale={0.015}
             >
               <T is={gltf.nodes.mixamorigHips} />
