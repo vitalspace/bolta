@@ -61,6 +61,7 @@ Command: npx @threlte/gltf@3.0.1 .\car.glb -T --draco /draco/
   let rigidBody: RapierRigidBody | undefined = $state<RapierRigidBody>();
   let objectRef: Group | undefined = $state<Group>();
   let controls: ThirdPersonControls | undefined;
+  let vehicleRegistered = false;
 
   // Estado para controlar si este vehículo está activo
   let isActiveVehicle = $derived($isInVehicle && $currentVehicle?.id === carId);
@@ -92,9 +93,21 @@ Command: npx @threlte/gltf@3.0.1 .\car.glb -T --draco /draco/
     }
   });
 
-
   useTask(() => {
     if (!rigidBody || !objectRef || !cameraRef || !controls) return;
+
+    // Registrar el vehículo una vez que todo esté listo
+    if (!vehicleRegistered && mainGroupRef) {
+      console.log("Registering vehicle with ID:", carId);
+      gameActions.registerVehicle({
+        id: carId,
+        reference: mainGroupRef,
+        position: position,
+        rotation: rotation || [0, 0, 0],
+        type: "car"
+      });
+      vehicleRegistered = true;
+    }
 
     // Solo procesar controles si este vehículo está activo y no hay transición
     if (!isActiveVehicle || isTransitioning) return;

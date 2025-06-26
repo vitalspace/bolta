@@ -35,6 +35,8 @@
       // Salir del vehículo - iniciar transición
       gameActions.exitVehicle();
       startCameraTransition("player");
+    } else {
+      console.log("Cannot toggle vehicle. Can enter:", $gameState.canEnterVehicle, "Nearby vehicles:", $gameState.nearbyVehicles.length);
     }
   };
 
@@ -145,8 +147,6 @@
     };
   });
 
-  // Debug: mostrar estado actual en pantalla
-
 </script>
 
 <T.PerspectiveCamera makeDefault bind:ref={cameraRef} />
@@ -168,6 +168,7 @@
   <div>Can Enter Vehicle: {$gameState.canEnterVehicle}</div>
   <div>Player Visible: {$playerVisible}</div>
   <div>Current Vehicle: {$gameState.currentVehicle?.id || 'None'}</div>
+  <div>Nearby Vehicles: {$gameState.nearbyVehicles.length}</div>
   <div>Player Position: [{$gameState.playerPosition[0].toFixed(1)}, {$gameState.playerPosition[1].toFixed(1)}, {$gameState.playerPosition[2].toFixed(1)}]</div>
   {#if $gameState.currentVehicle}
     <div>Vehicle Position: [{$gameState.currentVehicle.position[0].toFixed(1)}, {$gameState.currentVehicle.position[1].toFixed(1)}, {$gameState.currentVehicle.position[2].toFixed(1)}]</div>
