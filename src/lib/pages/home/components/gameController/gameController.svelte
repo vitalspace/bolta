@@ -146,14 +146,7 @@
   });
 
   // Debug: mostrar estado actual en pantalla
-  $effect(() => {
-    console.log("Game state changed:", {
-      controlMode: $gameState.controlMode,
-      canEnterVehicle: $gameState.canEnterVehicle,
-      currentVehicle: $gameState.currentVehicle?.id,
-      playerVisible: $playerVisible
-    });
-  });
+
 </script>
 
 <T.PerspectiveCamera makeDefault bind:ref={cameraRef} />
