@@ -6,7 +6,7 @@
 </script>
 
 
-    <T.Group position={[0, 0, -5]}>
+    <T.Group position={[0, 2, -5]}>
       <AutoColliders
         shape="cuboid"
         sensor={true}
