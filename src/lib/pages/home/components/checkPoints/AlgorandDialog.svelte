@@ -94,9 +94,10 @@
 </script>
 
 {#if isOpen}
-  <!-- Modal Backdrop -->
+  <!-- Modal Backdrop with higher z-index -->
   <div 
-    class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+    class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
+    style="z-index: 9999;"
     onclick={handleBackdropClick}
   >
     <!-- Modal Content -->
