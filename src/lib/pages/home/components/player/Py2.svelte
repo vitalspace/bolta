@@ -140,7 +140,8 @@ Command: npx @threlte/gltf@3.0.1 .\man.glb -T --draco /draco/
 
     // Handle jump
     if ($keys.space.isPressed && isGrounded && jumpCooldown <= 0) {
-      console.log("Player jumping!");
+
+      $actions.Jumping?.play();
       
       // Apply upward impulse
       rigidBody.applyImpulse({ x: 0, y: JUMP_FORCE, z: 0 }, true);
