@@ -200,7 +200,8 @@ class App {
       }
 
       // Verificar si la cuenta ya hizo opt-in a la aplicación
-      const hasOptedIn = accountInfo['apps-local-state']?.some((app: any) => app.id === appId);
+      const appsLocalState = accountInfo['apps-local-state'];
+      const hasOptedIn = Array.isArray(appsLocalState) && appsLocalState.some((app: any) => app.id === appId);
       
       if (!hasOptedIn) {
         console.log("Realizando opt-in a la aplicación primero...");
