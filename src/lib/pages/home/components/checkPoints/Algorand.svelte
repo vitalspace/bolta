@@ -11,12 +11,10 @@
   const handleExit = () => isEnter = false;
 
   useTask(() => {
-
     if($keys.e.isPressed && isEnter) {
-      console.log("hello")
       isEnter = false
+      console.log("hello")
     }
-    
   })
   
 </script>
