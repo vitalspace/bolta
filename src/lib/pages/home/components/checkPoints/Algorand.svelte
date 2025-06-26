@@ -25,8 +25,8 @@
       <AutoColliders
         shape="cuboid"
         sensor={true}
-        onsensorenter={() => handleEnter}
-        onsensorexit={() => handleExit}
+        onsensorenter={handleEnter}
+        onsensorexit={handleExit}
       >
         <T.Mesh >
           <T.CylinderGeometry args={[0.4, 0.4, 0.5]} />
