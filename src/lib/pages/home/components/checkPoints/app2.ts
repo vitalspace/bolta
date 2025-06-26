@@ -16,6 +16,12 @@ const peraWallet = new PeraWalletConnect({
 const appId = 741611642;
 const contract = new algosdk.ABIContract(arc32.contract);
 
+// Interfaz para SignerTransaction según la documentación de Pera Wallet
+interface SignerTransaction {
+  txn: Transaction;
+  signers?: string[];
+}
+
 class App {
   atc: algosdk.AtomicTransactionComposer;
   constructor() {
@@ -78,14 +84,19 @@ class App {
   makePeraWalletSigner() {
     return {
       signTxn: async (txn: Transaction): Promise<Uint8Array> => {
-        const txnToSign = {
+        const connectedAccount = this.getConnectedAccount();
+        if (!connectedAccount) {
+          throw new Error("No hay cuenta conectada");
+        }
+
+        const signerTxn: SignerTransaction = {
           txn: txn,
-          signers: [],
+          signers: [connectedAccount],
         };
 
         try {
-          const signedTxn = await peraWallet.signTransaction([txnToSign]);
-          return signedTxn[0];
+          const signedTxnGroups = await peraWallet.signTransaction([[signerTxn]]);
+          return signedTxnGroups[0][0];
         } catch (error) {
           console.error("Error al firmar con Pera Wallet:", error);
           throw error;
@@ -100,14 +111,20 @@ class App {
   ): Promise<Uint8Array[]> {
     const sender = this.getConnectedAccount()!;
 
-    const signerTxns = txnGroup.map((txn, i) => ({
+    // Convertir a formato SignerTransaction según la documentación
+    const signerTxns: SignerTransaction[] = txnGroup.map((txn, i) => ({
       txn,
       signers: indexesToSign.includes(i) ? [sender] : [],
     }));
 
-    const signedBlobs = await peraWallet.signTransaction(signerTxns);
-
-    return signedBlobs;
+    try {
+      // Usar el formato correcto: array de arrays de SignerTransaction
+      const signedTxnGroups = await peraWallet.signTransaction([signerTxns]);
+      return signedTxnGroups[0];
+    } catch (error) {
+      console.error("Error al firmar transacciones:", error);
+      throw error;
+    }
   }
 
   async executeABIMethod(
@@ -164,12 +181,18 @@ class App {
 
   async compileAndSendTxn(txn: Transaction) {
     try {
-      const txnToSign = {
+      const connectedAccount = this.getConnectedAccount();
+      if (!connectedAccount) {
+        throw new Error("No hay cuenta conectada");
+      }
+
+      const signerTxn: SignerTransaction = {
         txn: txn,
-        signers: [],
+        signers: [connectedAccount],
       };
 
-      const signedTxn = await peraWallet.signTransaction([txnToSign]);
+      const signedTxnGroups = await peraWallet.signTransaction([[signerTxn]]);
+      const signedTxn = signedTxnGroups[0][0];
       const txId = txn.txID().toString();
 
       await algoclient.sendRawTransaction(signedTxn).do();
@@ -321,16 +344,28 @@ class App {
       appIndex: appId,
     });
 
-    // Enviar la transacción firmada con Pera Wallet
-    const signedTxn = await this.signTransaction([optInTxn], [0]);
+    // Crear SignerTransaction según la documentación
+    const signerTxn: SignerTransaction = {
+      txn: optInTxn,
+      signers: [connectedAccount],
+    };
 
-    const txId = optInTxn.txID().toString();
+    try {
+      // Usar el formato correcto para Pera Wallet
+      const signedTxnGroups = await peraWallet.signTransaction([[signerTxn]]);
+      const signedTxn = signedTxnGroups[0][0];
 
-    await algoclient.sendRawTransaction(signedTxn[0]).do();
-    await algosdk.waitForConfirmation(algoclient, txId, 3);
+      const txId = optInTxn.txID().toString();
 
-    console.log("Opt-in exitoso. TxID:", txId);
-    return txId;
+      await algoclient.sendRawTransaction(signedTxn).do();
+      await algosdk.waitForConfirmation(algoclient, txId, 3);
+
+      console.log("Opt-in exitoso. TxID:", txId);
+      return txId;
+    } catch (error) {
+      console.error("Error en opt-in:", error);
+      throw error;
+    }
   }
 }
 
