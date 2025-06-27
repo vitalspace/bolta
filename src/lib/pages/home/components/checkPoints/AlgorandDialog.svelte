@@ -44,6 +44,7 @@
     try {
       isLoadingInfo = true;
       accountInfo = await app.getAccountInfo();
+      console.log("Loaded account info:", accountInfo);
     } catch (error) {
       console.error("Error loading account info:", error);
     } finally {
@@ -81,14 +82,14 @@
 
   const mintNFT = async () => {
     if (!isConnected) {
-      console.error("Primero debes conectar tu wallet");
+      console.error("You must connect your wallet first");
       return;
     }
 
     try {
       isMinting = true;
       const assetId = await app.mint();
-      console.log("¡NFT creado exitosamente! Asset ID:", assetId);
+      console.log("NFT created successfully! Asset ID:", assetId);
       // Refresh account info after minting
       await loadAccountInfo();
     } catch (error) {
@@ -100,7 +101,7 @@
 
   const getAssets = async () => {
     if (!isConnected) {
-      console.error("Primero debes conectar tu wallet");
+      console.error("You must connect your wallet first");
       return;
     }
 
@@ -142,7 +143,7 @@
           </div>
           <div>
             <h2 class="text-xl font-bold text-white">Algorand Blockchain</h2>
-            <p class="text-sm text-gray-400">Conecta tu wallet y crea NFTs</p>
+            <p class="text-sm text-gray-400">Connect your wallet and create NFTs</p>
           </div>
         </div>
         <button 
@@ -160,13 +161,13 @@
           <div class="flex items-center gap-3 mb-3">
             <div class="w-2 h-2 rounded-full {isConnected ? 'bg-green-400' : 'bg-red-400'}"></div>
             <span class="text-sm font-medium text-gray-300">
-              {isConnected ? 'Wallet Conectada' : 'Wallet Desconectada'}
+              {isConnected ? 'Wallet Connected' : 'Wallet Disconnected'}
             </span>
           </div>
           
           {#if isConnected}
             <div class="text-xs text-gray-400 mb-3">
-              Cuenta: <span class="text-blue-400 font-mono">{formatAccount(account)}</span>
+              Account: <span class="text-blue-400 font-mono">{formatAccount(account)}</span>
             </div>
           {/if}
 
@@ -179,17 +180,17 @@
             {#if isConnecting}
               <div class="flex items-center justify-center gap-2">
                 <div class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                Conectando...
+                Connecting...
               </div>
             {:else if isConnected}
               <div class="flex items-center justify-center gap-2">
                 <Wallet class="w-4 h-4" />
-                Desconectar Wallet
+                Disconnect Wallet
               </div>
             {:else}
               <div class="flex items-center justify-center gap-2">
                 <Wallet class="w-4 h-4" />
-                Conectar Pera Wallet
+                Connect Pera Wallet
               </div>
             {/if}
           </button>
@@ -201,7 +202,7 @@
             <div class="flex items-center justify-between mb-4">
               <div class="flex items-center gap-3">
                 <User class="w-5 h-5 text-green-400" />
-                <h3 class="font-semibold text-white">Información de la Cuenta</h3>
+                <h3 class="font-semibold text-white">Account Information</h3>
               </div>
               <button
                 onclick={loadAccountInfo}
@@ -222,7 +223,7 @@
                 <div class="flex items-center justify-between p-3 bg-gray-800/50 rounded-lg">
                   <div class="flex items-center gap-2">
                     <DollarSign class="w-4 h-4 text-green-400" />
-                    <span class="text-sm text-gray-300">Balance ALGO</span>
+                    <span class="text-sm text-gray-300">ALGO Balance</span>
                   </div>
                   <span class="text-sm font-semibold text-white">{accountInfo.balance.toFixed(6)} ALGO</span>
                 </div>
@@ -240,7 +241,7 @@
                 <div class="p-3 bg-gray-800/50 rounded-lg">
                   <div class="flex items-center gap-2 mb-2">
                     <Wallet class="w-4 h-4 text-purple-400" />
-                    <span class="text-sm text-gray-300">Dirección</span>
+                    <span class="text-sm text-gray-300">Address</span>
                   </div>
                   <div class="text-xs font-mono text-purple-400 break-all">{accountInfo.address}</div>
                 </div>
@@ -250,7 +251,7 @@
                   <div class="p-3 bg-gray-800/50 rounded-lg">
                     <div class="flex items-center gap-2 mb-2">
                       <Image class="w-4 h-4 text-yellow-400" />
-                      <span class="text-sm text-gray-300">Assets Recientes</span>
+                      <span class="text-sm text-gray-300">Recent Assets</span>
                     </div>
                     <div class="space-y-2 max-h-32 overflow-y-auto">
                       {#each accountInfo.assets.slice(0, 3) as asset}
@@ -261,7 +262,7 @@
                       {/each}
                       {#if accountInfo.assets.length > 3}
                         <div class="text-xs text-gray-500 text-center">
-                          +{accountInfo.assets.length - 3} más...
+                          +{accountInfo.assets.length - 3} more...
                         </div>
                       {/if}
                     </div>
@@ -270,7 +271,7 @@
               </div>
             {:else}
               <div class="text-center py-4">
-                <p class="text-sm text-gray-400">Error al cargar información de la cuenta</p>
+                <p class="text-sm text-gray-400">Error loading account information</p>
               </div>
             {/if}
           </div>
@@ -281,7 +282,7 @@
           <div class="space-y-4">
             <h3 class="text-lg font-semibold text-white flex items-center gap-2">
               <Zap class="w-5 h-5 text-yellow-400" />
-              Acciones Disponibles
+              Available Actions
             </h3>
 
             <!-- Mint NFT -->
@@ -289,8 +290,8 @@
               <div class="flex items-center gap-3 mb-3">
                 <Image class="w-5 h-5 text-purple-400" />
                 <div>
-                  <h4 class="font-semibold text-white">Crear NFT</h4>
-                  <p class="text-xs text-gray-400">Crea un token no fungible único</p>
+                  <h4 class="font-semibold text-white">Create NFT</h4>
+                  <p class="text-xs text-gray-400">Create a unique non-fungible token</p>
                 </div>
               </div>
               
@@ -302,12 +303,12 @@
                 {#if isMinting}
                   <div class="flex items-center justify-center gap-2">
                     <div class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                    Creando NFT...
+                    Creating NFT...
                   </div>
                 {:else}
                   <div class="flex items-center justify-center gap-2">
                     <Image class="w-4 h-4" />
-                    Crear NFT
+                    Create NFT
                   </div>
                 {/if}
               </button>
@@ -318,8 +319,8 @@
               <div class="flex items-center gap-3 mb-3">
                 <Coins class="w-5 h-5 text-blue-400" />
                 <div>
-                  <h4 class="font-semibold text-white">Ver Mis Assets</h4>
-                  <p class="text-xs text-gray-400">Consulta tus tokens y NFTs en consola</p>
+                  <h4 class="font-semibold text-white">View My Assets</h4>
+                  <p class="text-xs text-gray-400">Check your tokens and NFTs in console</p>
                 </div>
               </div>
               
@@ -329,7 +330,7 @@
               >
                 <div class="flex items-center justify-center gap-2">
                   <Coins class="w-4 h-4" />
-                  Ver Assets
+                  View Assets
                 </div>
               </button>
             </div>
@@ -340,9 +341,9 @@
             <div class="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
               <Wallet class="w-8 h-8 text-gray-500" />
             </div>
-            <h3 class="text-lg font-semibold text-gray-300 mb-2">Conecta tu Wallet</h3>
+            <h3 class="text-lg font-semibold text-gray-300 mb-2">Connect Your Wallet</h3>
             <p class="text-sm text-gray-500">
-              Conecta tu Pera Wallet para acceder a las funciones de Algorand blockchain
+              Connect your Pera Wallet to access Algorand blockchain features
             </p>
           </div>
         {/if}

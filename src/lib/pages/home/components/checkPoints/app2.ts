@@ -5,7 +5,7 @@ import { PeraWalletConnect } from "@perawallet/connect";
 const algoclient = AlgorandClient.testNet();
 
 const peraWallet = new PeraWalletConnect({
-  chainId: 416002, // ID de cadena de TestNet
+  chainId: 416002, // TestNet chain ID
 });
 
 const API_TESTNET = "https://testnet-api.algonode.cloud";
@@ -28,7 +28,7 @@ class App {
       if (accounts && accounts.length > 0) return accounts[0];
       return null;
     } catch (error) {
-      console.log("No se encontró sesión activa:", error);
+      console.log("No active session found:", error);
       return null;
     }
   }
@@ -43,7 +43,7 @@ class App {
       localStorage.setItem("peraWallet.account", accounts[0]);
       return accounts;
     } catch (error) {
-      console.error("Error al conectar la billetera:", error);
+      console.error("Error connecting wallet:", error);
       throw error;
     }
   }
@@ -62,7 +62,7 @@ class App {
       }
     } catch (error) {
       localStorage.removeItem("peraWallet.account");
-      console.error("Error al reconectar la billetera:", error);
+      console.error("Error reconnecting wallet:", error);
       return null;
     }
   }
@@ -93,17 +93,21 @@ class App {
     if (!account) return null;
 
     try {
+      // Get account information from the main account endpoint
       const accountInfoReq = await fetch(`${API_TESTNET}/v2/accounts/${account}`);
       const accountData = await accountInfoReq.json();
 
-      const assetsReq = await fetch(`${API_TESTNET}/v2/accounts/${account}/assets`);
-      const assetsData = await assetsReq.json();
+      console.log("Full account data:", accountData);
 
+      // Extract assets from the account data
+      // The assets are in the 'assets' field, not 'asset-holdings'
+      const assets = accountData.assets || [];
+      
       return {
         address: account,
         balance: accountData.amount / 1000000, // Convert microAlgos to Algos
-        assets: assetsData.assets || [],
-        totalAssets: assetsData.assets?.length || 0
+        assets: assets,
+        totalAssets: assets.length
       };
     } catch (error) {
       console.error("Error getting account info:", error);
@@ -112,12 +116,24 @@ class App {
   }
 
   async getMyAssets() {
-    const req = await fetch(
-      `${API_TESTNET}/v2/accounts/${this.getConnectedAccount()}/assets`
-    );
-    const res = await req.json();
-    console.log(res);
-    return res;
+    const account = this.getConnectedAccount();
+    if (!account) return null;
+
+    try {
+      // Use the main account endpoint which includes assets
+      const req = await fetch(`${API_TESTNET}/v2/accounts/${account}`);
+      const res = await req.json();
+      console.log("Complete account response:", res);
+      
+      // Return the assets from the account data
+      return {
+        assets: res.assets || [],
+        assetHoldings: res['asset-holdings'] || []
+      };
+    } catch (error) {
+      console.error("Error getting assets:", error);
+      return null;
+    }
   }
 
   async mint() {
@@ -131,14 +147,14 @@ class App {
       signer: this.signTransaction.bind(this),
     });
 
-    const createtAsset = result.assetId;
-    console.log(createtAsset);
-    return createtAsset;
+    const createdAsset = result.assetId;
+    console.log("Created asset ID:", createdAsset);
+    return createdAsset;
   }
 
   async assetInfo(assetId: any) {
     const result = await algoclient.asset.getById(assetId);
-    console.log(result, "account", this.getConnectedAccount()!);
+    console.log("Asset info:", result, "account:", this.getConnectedAccount()!);
     return result;
   }
 }
