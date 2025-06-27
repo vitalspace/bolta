@@ -127,14 +127,14 @@
 </script>
 
 {#if isOpen}
-  <!-- Modal Backdrop with higher z-index -->
+  <!-- Modal Backdrop without blur -->
   <div 
-    class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
+    class="fixed inset-0 bg-black/70 flex items-center justify-center p-4"
     style="z-index: 9999;"
     onclick={handleBackdropClick}
   >
-    <!-- Modal Content -->
-    <div class="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl border border-gray-700 shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+    <!-- Modal Content without shadow -->
+    <div class="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl border border-gray-700 max-w-lg w-full max-h-[90vh] overflow-y-auto">
       <!-- Header -->
       <div class="flex items-center justify-between p-6 border-b border-gray-700">
         <div class="flex items-center gap-3">
