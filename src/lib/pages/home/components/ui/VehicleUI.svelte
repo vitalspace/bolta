@@ -9,8 +9,8 @@
   let nitroBlocked = $derived($vehicleData.nitroBlocked);
   let maxSpeed = 120; // Maximum speed for percentage calculation
 
-  // Calculate speedometer percentage
-  let speedPercentage = $derived(Math.min((currentSpeed / maxSpeed) * 100, 100));
+  // Calculate speedometer percentage - ensure it's properly clamped
+  let speedPercentage = $derived(Math.max(0, Math.min((currentSpeed / maxSpeed) * 100, 100)));
   let nitroPercentage = $derived(Math.max(0, Math.min(nitroLevel, 100)));
 
   // Determine speedometer color based on speed
@@ -19,6 +19,10 @@
     : speedPercentage < 70 
     ? 'text-yellow-400' 
     : 'text-red-400');
+
+  // Calculate stroke dash offset for circular progress
+  let circleCircumference = 283; // 2 * π * 45 (radius)
+  let strokeDashOffset = $derived(circleCircumference - (circleCircumference * speedPercentage) / 100);
 
   // Function to exit vehicle
   const exitVehicle = () => {
@@ -55,9 +59,10 @@
               stroke="currentColor"
               stroke-width="8"
               stroke-linecap="round"
-              stroke-dasharray="283"
-              stroke-dashoffset={283 - (283 * speedPercentage) / 100}
-              class="transition-all duration-300 {speedColor}"
+              stroke-dasharray={circleCircumference}
+              stroke-dashoffset={strokeDashOffset}
+              class="transition-all duration-200 {speedColor}"
+              style="transition-property: stroke-dashoffset, color;"
             />
           </svg>
           
@@ -68,7 +73,7 @@
           </div>
         </div>
 
-        <!-- Speed indicator -->
+        <!-- Speed indicator bar -->
         <div class="text-center">
           <div class="flex items-center justify-center gap-2 mb-2">
             <Gauge class="w-4 h-4 text-gray-400" />
@@ -76,9 +81,13 @@
           </div>
           <div class="w-full bg-gray-700 rounded-full h-2">
             <div 
-              class="h-2 rounded-full transition-all duration-300 {speedColor.replace('text-', 'bg-')}"
-              style="width: {speedPercentage}%"
+              class="h-2 rounded-full transition-all duration-200 {speedColor.replace('text-', 'bg-')}"
+              style="width: {speedPercentage}%; transition-property: width, background-color;"
             ></div>
+          </div>
+          <!-- Debug info -->
+          <div class="text-xs text-gray-500 mt-1">
+            {speedPercentage.toFixed(1)}% | {currentSpeed.toFixed(1)} km/h
           </div>
         </div>
       </div>
