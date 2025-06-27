@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { app } from "./app2";
-  import { Wallet, X, Zap, Coins, Image } from "@lucide/svelte";
+  import { app, type AccountInfo } from "./app2";
+  import { Wallet, X, Zap, Coins, Image, RefreshCw, User, DollarSign } from "@lucide/svelte";
 
   let { 
     isOpen = $bindable(false),
@@ -11,6 +11,8 @@
   let account = $state("");
   let isConnecting = $state(false);
   let isMinting = $state(false);
+  let isLoadingInfo = $state(false);
+  let accountInfo = $state<AccountInfo | null>(null);
 
   const init = async () => {
     try {
@@ -19,17 +21,33 @@
       if (reconnectedAccount) {
         account = reconnectedAccount;
         isConnected = true;
+        await loadAccountInfo();
       } else {
         const savedAccount = app.getConnectedAccount();
         if (savedAccount) {
           account = savedAccount;
           isConnected = true;
+          await loadAccountInfo();
         }
       }
     } catch (error) {
       console.log("No existing session to reconnect");
       isConnected = false;
       account = "";
+      accountInfo = null;
+    }
+  };
+
+  const loadAccountInfo = async () => {
+    if (!isConnected) return;
+    
+    try {
+      isLoadingInfo = true;
+      accountInfo = await app.getAccountInfo();
+    } catch (error) {
+      console.error("Error loading account info:", error);
+    } finally {
+      isLoadingInfo = false;
     }
   };
 
@@ -38,6 +56,7 @@
       app.disconnectWallet();
       isConnected = false;
       account = "";
+      accountInfo = null;
     } else {
       try {
         isConnecting = true;
@@ -45,6 +64,7 @@
         if (accounts.length > 0) {
           account = accounts[0];
           isConnected = true;
+          await loadAccountInfo();
         }
       } catch (error) {
         console.error("Failed to connect wallet:", error);
@@ -67,8 +87,10 @@
 
     try {
       isMinting = true;
-      await app.mint();
-      console.log("¡NFT creado exitosamente!");
+      const assetId = await app.mint();
+      console.log("¡NFT creado exitosamente! Asset ID:", assetId);
+      // Refresh account info after minting
+      await loadAccountInfo();
     } catch (error) {
       console.error("Error creating NFT:", error);
     } finally {
@@ -83,7 +105,8 @@
     }
 
     try {
-      await app.getMyAssets();
+      const assets = await app.getMyAssets();
+      console.log("Assets:", assets);
     } catch (error) {
       console.error("Error getting assets:", error);
     }
@@ -110,7 +133,7 @@
     onclick={handleBackdropClick}
   >
     <!-- Modal Content -->
-    <div class="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl border border-gray-700 shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+    <div class="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl border border-gray-700 shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
       <!-- Header -->
       <div class="flex items-center justify-between p-6 border-b border-gray-700">
         <div class="flex items-center gap-3">
@@ -172,6 +195,87 @@
           </button>
         </div>
 
+        <!-- Account Information -->
+        {#if isConnected}
+          <div class="bg-gradient-to-r from-green-900/30 to-emerald-900/30 rounded-xl p-4 border border-green-700/50">
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center gap-3">
+                <User class="w-5 h-5 text-green-400" />
+                <h3 class="font-semibold text-white">Información de la Cuenta</h3>
+              </div>
+              <button
+                onclick={loadAccountInfo}
+                disabled={isLoadingInfo}
+                class="p-2 rounded-lg bg-green-600/20 hover:bg-green-600/30 transition-colors disabled:opacity-50"
+              >
+                <RefreshCw class="w-4 h-4 text-green-400 {isLoadingInfo ? 'animate-spin' : ''}" />
+              </button>
+            </div>
+
+            {#if isLoadingInfo}
+              <div class="flex items-center justify-center py-4">
+                <div class="w-6 h-6 border-2 border-green-400/30 border-t-green-400 rounded-full animate-spin"></div>
+              </div>
+            {:else if accountInfo}
+              <div class="space-y-3">
+                <!-- Balance -->
+                <div class="flex items-center justify-between p-3 bg-gray-800/50 rounded-lg">
+                  <div class="flex items-center gap-2">
+                    <DollarSign class="w-4 h-4 text-green-400" />
+                    <span class="text-sm text-gray-300">Balance ALGO</span>
+                  </div>
+                  <span class="text-sm font-semibold text-white">{accountInfo.balance.toFixed(6)} ALGO</span>
+                </div>
+
+                <!-- Assets Count -->
+                <div class="flex items-center justify-between p-3 bg-gray-800/50 rounded-lg">
+                  <div class="flex items-center gap-2">
+                    <Coins class="w-4 h-4 text-blue-400" />
+                    <span class="text-sm text-gray-300">Total Assets</span>
+                  </div>
+                  <span class="text-sm font-semibold text-white">{accountInfo.totalAssets}</span>
+                </div>
+
+                <!-- Address -->
+                <div class="p-3 bg-gray-800/50 rounded-lg">
+                  <div class="flex items-center gap-2 mb-2">
+                    <Wallet class="w-4 h-4 text-purple-400" />
+                    <span class="text-sm text-gray-300">Dirección</span>
+                  </div>
+                  <div class="text-xs font-mono text-purple-400 break-all">{accountInfo.address}</div>
+                </div>
+
+                <!-- Assets List (if any) -->
+                {#if accountInfo.assets.length > 0}
+                  <div class="p-3 bg-gray-800/50 rounded-lg">
+                    <div class="flex items-center gap-2 mb-2">
+                      <Image class="w-4 h-4 text-yellow-400" />
+                      <span class="text-sm text-gray-300">Assets Recientes</span>
+                    </div>
+                    <div class="space-y-2 max-h-32 overflow-y-auto">
+                      {#each accountInfo.assets.slice(0, 3) as asset}
+                        <div class="flex items-center justify-between text-xs">
+                          <span class="text-gray-400">ID: {asset['asset-id']}</span>
+                          <span class="text-white">{asset.amount}</span>
+                        </div>
+                      {/each}
+                      {#if accountInfo.assets.length > 3}
+                        <div class="text-xs text-gray-500 text-center">
+                          +{accountInfo.assets.length - 3} más...
+                        </div>
+                      {/if}
+                    </div>
+                  </div>
+                {/if}
+              </div>
+            {:else}
+              <div class="text-center py-4">
+                <p class="text-sm text-gray-400">Error al cargar información de la cuenta</p>
+              </div>
+            {/if}
+          </div>
+        {/if}
+
         <!-- Actions -->
         {#if isConnected}
           <div class="space-y-4">
@@ -215,7 +319,7 @@
                 <Coins class="w-5 h-5 text-blue-400" />
                 <div>
                   <h4 class="font-semibold text-white">Ver Mis Assets</h4>
-                  <p class="text-xs text-gray-400">Consulta tus tokens y NFTs</p>
+                  <p class="text-xs text-gray-400">Consulta tus tokens y NFTs en consola</p>
                 </div>
               </div>
               

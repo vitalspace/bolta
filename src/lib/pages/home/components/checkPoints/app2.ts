@@ -10,6 +10,13 @@ const peraWallet = new PeraWalletConnect({
 
 const API_TESTNET = "https://testnet-api.algonode.cloud";
 
+export interface AccountInfo {
+  address: string;
+  balance: number;
+  assets: any[];
+  totalAssets: number;
+}
+
 class App {
   constructor() {}
   
@@ -81,12 +88,36 @@ class App {
     return signedBlobs;
   }
 
+  async getAccountInfo(): Promise<AccountInfo | null> {
+    const account = this.getConnectedAccount();
+    if (!account) return null;
+
+    try {
+      const accountInfoReq = await fetch(`${API_TESTNET}/v2/accounts/${account}`);
+      const accountData = await accountInfoReq.json();
+
+      const assetsReq = await fetch(`${API_TESTNET}/v2/accounts/${account}/assets`);
+      const assetsData = await assetsReq.json();
+
+      return {
+        address: account,
+        balance: accountData.amount / 1000000, // Convert microAlgos to Algos
+        assets: assetsData.assets || [],
+        totalAssets: assetsData.assets?.length || 0
+      };
+    } catch (error) {
+      console.error("Error getting account info:", error);
+      return null;
+    }
+  }
+
   async getMyAssets() {
     const req = await fetch(
       `${API_TESTNET}/v2/accounts/${this.getConnectedAccount()}/assets`
     );
     const res = await req.json();
     console.log(res);
+    return res;
   }
 
   async mint() {
@@ -102,11 +133,13 @@ class App {
 
     const createtAsset = result.assetId;
     console.log(createtAsset);
+    return createtAsset;
   }
 
   async assetInfo(assetId: any) {
     const result = await algoclient.asset.getById(assetId);
     console.log(result, "account", this.getConnectedAccount()!);
+    return result;
   }
 }
 
