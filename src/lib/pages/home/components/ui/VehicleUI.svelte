@@ -85,16 +85,23 @@
           </div>
         </div>
 
-        <!-- Speed indicator bar - Always visible -->
+        <!-- Speed indicator bar - ALWAYS VISIBLE with minimum width -->
         <div class="text-center">
           <div class="flex items-center justify-center gap-2 mb-2">
             <Gauge class="w-4 h-4 text-gray-400" />
             <span class="text-sm text-gray-300">Speed</span>
           </div>
-          <div class="w-full bg-gray-700 rounded-full h-2 mb-2">
+          <!-- Progress bar container - always visible -->
+          <div class="w-full bg-gray-700 rounded-full h-2 mb-2 relative overflow-hidden">
+            <!-- Progress bar fill - with minimum width and proper calculation -->
             <div 
-              class="h-2 rounded-full transition-all duration-200 {speedColor.replace('text-', 'bg-')}"
-              style="width: {speedPercentage}%; transition-property: width, background-color; min-width: 2px;"
+              class="h-full rounded-full transition-all duration-200 absolute top-0 left-0"
+              style="
+                width: {Math.max(speedPercentage, 0)}%; 
+                min-width: {speedPercentage > 0 ? '4px' : '0px'};
+                background-color: {speedPercentage < 30 ? '#4ade80' : speedPercentage < 70 ? '#facc15' : '#f87171'};
+                transition-property: width, background-color;
+              "
             ></div>
           </div>
           <!-- Debug info - shows actual values -->
@@ -130,14 +137,15 @@
           </div>
         </div>
 
-        <!-- Nitro Bar -->
-        <div class="w-32 bg-gray-700 rounded-full h-3 mb-4">
+        <!-- Nitro Bar - also with minimum width -->
+        <div class="w-32 bg-gray-700 rounded-full h-3 mb-4 relative overflow-hidden">
           <div 
-            class="h-3 rounded-full transition-all duration-300 {
-              nitroBlocked ? 'bg-red-400' : 
-              nitroPercentage > 20 ? 'bg-blue-400' : 'bg-red-400'
-            }"
-            style="width: {nitroPercentage}%; min-width: 2px;"
+            class="h-full rounded-full transition-all duration-300 absolute top-0 left-0"
+            style="
+              width: {Math.max(nitroPercentage, 0)}%; 
+              min-width: {nitroPercentage > 0 ? '4px' : '0px'};
+              background-color: {nitroBlocked ? '#f87171' : nitroPercentage > 20 ? '#60a5fa' : '#f87171'};
+            "
           ></div>
         </div>
 
