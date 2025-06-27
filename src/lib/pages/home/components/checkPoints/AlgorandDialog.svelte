@@ -10,7 +10,7 @@
   let isConnected = $state(false);
   let account = $state("");
   let isConnecting = $state(false);
-  let isCreatingNFT = $state(false);
+  let isMinting = $state(false);
 
   const init = async () => {
     try {
@@ -59,20 +59,33 @@
     return `${acc.slice(0, 6)}...${acc.slice(-4)}`;
   }
 
-  const createNFT = async () => {
+  const mintNFT = async () => {
     if (!isConnected) {
       console.error("Primero debes conectar tu wallet");
       return;
     }
 
     try {
-      isCreatingNFT = true;
-      await app.createNFT();
+      isMinting = true;
+      await app.mint();
       console.log("¡NFT creado exitosamente!");
     } catch (error) {
       console.error("Error creating NFT:", error);
     } finally {
-      isCreatingNFT = false;
+      isMinting = false;
+    }
+  };
+
+  const getAssets = async () => {
+    if (!isConnected) {
+      console.error("Primero debes conectar tu wallet");
+      return;
+    }
+
+    try {
+      await app.getMyAssets();
+    } catch (error) {
+      console.error("Error getting assets:", error);
     }
   };
 
@@ -167,7 +180,7 @@
               Acciones Disponibles
             </h3>
 
-            <!-- Create NFT -->
+            <!-- Mint NFT -->
             <div class="bg-gradient-to-r from-purple-900/30 to-pink-900/30 rounded-xl p-4 border border-purple-700/50">
               <div class="flex items-center gap-3 mb-3">
                 <Image class="w-5 h-5 text-purple-400" />
@@ -178,11 +191,11 @@
               </div>
               
               <button
-                onclick={createNFT}
-                disabled={isCreatingNFT}
+                onclick={mintNFT}
+                disabled={isMinting}
                 class="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold py-2.5 px-4 rounded-lg transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
               >
-                {#if isCreatingNFT}
+                {#if isMinting}
                   <div class="flex items-center justify-center gap-2">
                     <div class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                     Creando NFT...
@@ -196,21 +209,24 @@
               </button>
             </div>
 
-            <!-- Future Actions Placeholder -->
-            <div class="bg-gray-800/30 rounded-xl p-4 border border-gray-700/50 opacity-50">
+            <!-- Get Assets -->
+            <div class="bg-gradient-to-r from-blue-900/30 to-cyan-900/30 rounded-xl p-4 border border-blue-700/50">
               <div class="flex items-center gap-3 mb-3">
-                <Coins class="w-5 h-5 text-gray-500" />
+                <Coins class="w-5 h-5 text-blue-400" />
                 <div>
-                  <h4 class="font-semibold text-gray-400">Más Funciones</h4>
-                  <p class="text-xs text-gray-500">Próximamente disponibles</p>
+                  <h4 class="font-semibold text-white">Ver Mis Assets</h4>
+                  <p class="text-xs text-gray-400">Consulta tus tokens y NFTs</p>
                 </div>
               </div>
               
               <button
-                disabled
-                class="w-full bg-gray-700 text-gray-400 font-semibold py-2.5 px-4 rounded-lg cursor-not-allowed"
+                onclick={getAssets}
+                class="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-semibold py-2.5 px-4 rounded-lg transition-all duration-200 hover:scale-105"
               >
-                Próximamente
+                <div class="flex items-center justify-center gap-2">
+                  <Coins class="w-4 h-4" />
+                  Ver Assets
+                </div>
               </button>
             </div>
           </div>
@@ -232,7 +248,7 @@
       <div class="px-6 py-4 border-t border-gray-700 bg-gray-800/50">
         <div class="flex items-center justify-between text-xs text-gray-400">
           <span>Algorand TestNet</span>
-          <span>App ID: 741611642</span>
+          <span>AlgoKit Utils</span>
         </div>
       </div>
     </div>
