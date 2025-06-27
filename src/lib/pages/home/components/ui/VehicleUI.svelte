@@ -2,27 +2,28 @@
   import { isInVehicle, vehicleData, keys } from "../../stores/stores";
   import { Gauge, Zap, LogOut, AlertTriangle } from "@lucide/svelte";
 
-  // Get vehicle data from store
-  let currentSpeed = $derived($vehicleData.currentSpeed);
-  let nitroLevel = $derived($vehicleData.nitroLevel);
-  let isNitroActive = $derived($vehicleData.isNitroActive);
-  let nitroBlocked = $derived($vehicleData.nitroBlocked);
+  // Get vehicle data from store with proper reactivity
+  $: currentSpeed = $vehicleData.currentSpeed || 0;
+  $: nitroLevel = $vehicleData.nitroLevel || 0;
+  $: isNitroActive = $vehicleData.isNitroActive || false;
+  $: nitroBlocked = $vehicleData.nitroBlocked || false;
+  
   let maxSpeed = 120; // Maximum speed for percentage calculation
 
-  // Calculate speedometer percentage - ensure it's properly clamped
-  let speedPercentage = $derived(Math.max(0, Math.min((currentSpeed / maxSpeed) * 100, 100)));
-  let nitroPercentage = $derived(Math.max(0, Math.min(nitroLevel, 100)));
+  // Calculate speedometer percentage - ensure it's properly clamped and always has a value
+  $: speedPercentage = Math.max(0, Math.min((currentSpeed / maxSpeed) * 100, 100));
+  $: nitroPercentage = Math.max(0, Math.min(nitroLevel, 100));
 
   // Determine speedometer color based on speed
-  let speedColor = $derived(speedPercentage < 30 
+  $: speedColor = speedPercentage < 30 
     ? 'text-green-400' 
     : speedPercentage < 70 
     ? 'text-yellow-400' 
-    : 'text-red-400');
+    : 'text-red-400';
 
   // Calculate stroke dash offset for circular progress
   let circleCircumference = 283; // 2 * π * 45 (radius)
-  let strokeDashOffset = $derived(circleCircumference - (circleCircumference * speedPercentage) / 100);
+  $: strokeDashOffset = circleCircumference - (circleCircumference * speedPercentage) / 100;
 
   // Function to exit vehicle
   const exitVehicle = () => {
@@ -30,6 +31,17 @@
     const event = new KeyboardEvent('keydown', { keyCode: 69 });
     document.dispatchEvent(event);
   };
+
+  // Debug logging to track data changes
+  $: {
+    console.log('VehicleUI Data Update:', {
+      currentSpeed,
+      speedPercentage,
+      nitroLevel,
+      isNitroActive,
+      nitroBlocked
+    });
+  }
 </script>
 
 {#if $isInVehicle}
@@ -73,21 +85,21 @@
           </div>
         </div>
 
-        <!-- Speed indicator bar -->
+        <!-- Speed indicator bar - Always visible -->
         <div class="text-center">
           <div class="flex items-center justify-center gap-2 mb-2">
             <Gauge class="w-4 h-4 text-gray-400" />
             <span class="text-sm text-gray-300">Speed</span>
           </div>
-          <div class="w-full bg-gray-700 rounded-full h-2">
+          <div class="w-full bg-gray-700 rounded-full h-2 mb-2">
             <div 
               class="h-2 rounded-full transition-all duration-200 {speedColor.replace('text-', 'bg-')}"
-              style="width: {speedPercentage}%; transition-property: width, background-color;"
+              style="width: {speedPercentage}%; transition-property: width, background-color; min-width: 2px;"
             ></div>
           </div>
-          <!-- Debug info -->
-          <div class="text-xs text-gray-500 mt-1">
-            {speedPercentage.toFixed(1)}% | {currentSpeed.toFixed(1)} km/h
+          <!-- Debug info - shows actual values -->
+          <div class="text-xs text-gray-500">
+            Speed: {speedPercentage.toFixed(1)}% ({currentSpeed.toFixed(1)} km/h)
           </div>
         </div>
       </div>
@@ -125,7 +137,7 @@
               nitroBlocked ? 'bg-red-400' : 
               nitroPercentage > 20 ? 'bg-blue-400' : 'bg-red-400'
             }"
-            style="width: {nitroPercentage}%"
+            style="width: {nitroPercentage}%; min-width: 2px;"
           ></div>
         </div>
 
@@ -143,6 +155,10 @@
             {:else}
               <span>Hold SHIFT for nitro</span>
             {/if}
+          </div>
+          <!-- Debug info for nitro -->
+          <div class="text-xs text-gray-600">
+            Nitro: {nitroPercentage.toFixed(1)}% | Active: {isNitroActive ? 'Yes' : 'No'}
           </div>
         </div>
       </div>
